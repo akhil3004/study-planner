@@ -1,0 +1,64 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="quiz-container">
+    <h1><%= module.name %> - Quiz</h1>
+    
+    <div class="breadcrumb">
+      <span>Dashboard</span> > <span>Courses</span> > <span><%= module.courseId.name %></span> > <span>Modules</span> > <span>Quiz</span>
+    </div>
+    
+    <div class="quiz-info">
+      <p><strong>Time Limit:</strong> <%= quiz.timeLimit %> minutes</p>
+      <p><strong>Questions:</strong> <%= quiz.questions.length %></p>
+      <div id="quiz-timer" class="timer" data-time="<%= quiz.timeLimit %>"><%= quiz.timeLimit %>:00</div>
+    </div>
+    
+    <form action="/quiz/submit/<%= quiz._id %>" method="POST" class="quiz-form">
+      <% quiz.questions.forEach(function(question, qIndex) { %>
+        <div class="question">
+          <p class="question-text"><%= qIndex + 1 %>. <%= question.question %></p>
+          
+          <ul class="options">
+            <% question.options.forEach(function(option, oIndex) { %>
+              <li class="option">
+                <label>
+                  <input type="radio" name="answers[<%= qIndex %>]" value="<%= oIndex %>" required>
+                  <%= option %>
+                </label>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      <% }); %>
+      
+      <button type="submit" class="btn btn-block">Submit Quiz</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Quiz timer
+  document.addEventListener('DOMContentLoaded', function() {
+    const timerElement = document.getElementById('quiz-timer');
+    let timeLeft = parseInt(timerElement.dataset.time) * 60; // Convert to seconds
+    const quizForm = document.querySelector('.quiz-form');
+    
+    const interval = setInterval(function() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      
+      timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        alert('Time is up! Submitting your quiz.');
+        quizForm.submit();
+      } else {
+        timeLeft--;
+      }
+    }, 1000);
+  });
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <h1>Select Semester</h1>
+  
+  <div class="breadcrumb">
+    <span>Dashboard</span> > <span>Select Semester</span>
+  </div>
+  
+  <div class="card-container">
+    <% semesters.forEach(function(semester) { %>
+      <div class="card">
+        <div class="card-header">
+          <h2>Semester <%= semester %></h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">View courses for Semester <%= semester %></p>
+          <a href="/courses/semester/<%= semester %>/branches" class="btn">Select</a>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

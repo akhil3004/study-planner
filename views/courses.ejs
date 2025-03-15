@@ -1,0 +1,33 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <h1>Courses for <%= branch %> - Semester <%= semester %></h1>
+  
+  <div class="breadcrumb">
+    <span>Dashboard</span> > <span>Semester <%= semester %></span> > <span><%= branch %></span> > <span>Courses</span>
+  </div>
+  
+  <% if (courses.length === 0) { %>
+    <div class="alert alert-info">
+      No courses found for this semester and branch. Please check back later.
+    </div>
+  <% } else { %>
+    <div class="card-container">
+      <% courses.forEach(function(course) { %>
+        <div class="card">
+          <div class="card-header">
+            <h2><%= course.code %></h2>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title"><%= course.name %></h3>
+            <p class="card-text"><strong>Credits:</strong> <%= course.credits %></p>
+            <p class="card-text"><%= course.description.substring(0, 100) %>...</p>
+            <a href="/courses/course/<%= course._id %>/modules" class="btn">View Modules</a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

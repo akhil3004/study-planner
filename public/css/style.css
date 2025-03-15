@@ -1,0 +1,251 @@
+/* General Styles */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --dark-color: #34495e;
+    --light-color: #ecf0f1;
+    --danger-color: #e74c3c;
+    --success-color: #2ecc71;
+    --font-primary: 'Roboto', sans-serif;
+    --transition: all 0.3s ease;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    background-color: #f4f7f9;
+    color: #333;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  /* Header Styles */
+  header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  
+  .logo span {
+    color: var(--secondary-color);
+  }
+  
+  .nav-links {
+    display: flex;
+    list-style: none;
+  }
+  
+  .nav-links li {
+    margin-left: 1.5rem;
+  }
+  
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+  
+  .nav-links a:hover {
+    color: var(--light-color);
+  }
+  
+  /* Form Styles */
+  .form-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--dark-color);
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+  
+  .btn:hover {
+    background-color: #2980b9;
+  }
+  
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+  
+  .error-message {
+    color: var(--danger-color);
+    margin-bottom: 1rem;
+  }
+  
+  /* Card Styles */
+  .card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: var(--transition);
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .card-header {
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-title {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  
+  .card-text {
+    color: #666;
+    margin-bottom: 1rem;
+  }
+  
+  /* Timer Styles */
+  .timer-container {
+    text-align: center;
+    margin: 2rem 0;
+  }
+  
+  .timer {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+  
+  .timer-controls {
+    margin-top: 1rem;
+  }
+  
+  /* Quiz Styles */
+  .quiz-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .question {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .question-text {
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+  
+  .options {
+    list-style: none;
+  }
+  
+  .option {
+    margin-bottom: 0.5rem;
+  }
+  
+  .option label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .option input {
+    margin-right: 0.5rem;
+    width: auto;
+  }
+  
+  /* Responsive Design */
+  @media screen and (max-width: 768px) {
+    .card-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .navbar {
+      flex-direction: column;
+    }
+    
+    .nav-links {
+      margin-top: 1rem;
+    }
+    
+    .nav-links li {
+      margin-left: 1rem;
+      margin-right: 1rem;
+    }
+  }

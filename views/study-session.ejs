@@ -1,0 +1,53 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <h1><%= module.name %> - Study Session</h1>
+  
+  <div class="breadcrumb">
+    <span>Dashboard</span> > <span>Courses</span> > <span><%= module.courseId.name %></span> > <span>Modules</span> > <span>Study Session</span>
+  </div>
+  
+  <div class="timer-container">
+    <h2>Study Timer</h2>
+    <div id="timer" class="timer" data-time="45">45:00</div>
+    <div class="timer-controls">
+      <button id="start-timer" class="btn">Start</button>
+      <button id="pause-timer" class="btn">Pause</button>
+      <button id="reset-timer" class="btn">Reset</button>
+    </div>
+  </div>
+  
+  <div class="module-content">
+    <h2>Module Topics</h2>
+    
+    <% module.topics.forEach(function(topic, index) { %>
+      <div class="topic-card">
+        <h3><%= index + 1 %>. <%= topic.name %></h3>
+        <p><strong>Recommended Study Time:</strong> <%= topic.recommendedStudyTime %> minutes</p>
+        
+        <% if (topic.resources && topic.resources.length > 0) { %>
+          <div class="resources">
+            <h4>Resources</h4>
+            <ul>
+              <% topic.resources.forEach(function(resource) { %>
+                <li>
+                  <a href="<%= resource.url %>" target="_blank">
+                    <%= resource.title %> (<%= resource.type %>)
+                  </a>
+                </li>
+              <% }); %>
+            </ul>
+          </div>
+        <% } %>
+      </div>
+    <% }); %>
+  </div>
+  
+  <div class="action-buttons">
+    <a href="/quiz/module/<%= module._id %>" id="start-quiz" class="btn btn-primary btn-disabled">Take Quiz</a>
+  </div>
+</div>
+
+<script src="/js/timer.js"></script>
+
+<%- include('partials/footer') %>

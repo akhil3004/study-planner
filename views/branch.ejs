@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <h1>Select Branch for Semester <%= semester %></h1>
+  
+  <div class="breadcrumb">
+    <span>Dashboard</span> > <span>Semester <%= semester %></span> > <span>Select Branch</span>
+  </div>
+  
+  <div class="card-container">
+    <% branches.forEach(function(branch) { %>
+      <div class="card">
+        <div class="card-header">
+          <h2><%= branch %></h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">View courses for <%= branch %></p>
+          <a href="/courses/semester/<%= semester %>/branch/<%= encodeURIComponent(branch) %>" class="btn">Select</a>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

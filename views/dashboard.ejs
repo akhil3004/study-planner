@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="dashboard-header">
+    <h1>Welcome, <%= user.name %></h1>
+    <p>Branch: <%= user.branch %> | Semester: <%= user.semester %></p>
+  </div>
+  
+  <div class="dashboard-actions">
+    <div class="card-container">
+      <div class="card">
+        <div class="card-header">
+          <h2>Study Plan</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">Create and manage your study schedule based on KTU curriculum.</p>
+          <a href="/courses/semesters" class="btn">Start Studying</a>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2>My Progress</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">Track your study progress and quiz scores.</p>
+          <a href="#" class="btn">View Progress</a>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2>My Profile</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">Update your profile information and preferences.</p>
+          <a href="#" class="btn">Edit Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="recent-activity">
+    <h2>Recent Activity</h2>
+    <div class="activity-list">
+      <p>You haven't completed any study sessions yet.</p>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

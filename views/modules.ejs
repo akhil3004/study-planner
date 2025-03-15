@@ -1,0 +1,38 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <h1><%= course.name %> Modules</h1>
+  
+  <div class="breadcrumb">
+    <span>Dashboard</span> > <span>Courses</span> > <span><%= course.name %></span> > <span>Modules</span>
+  </div>
+  
+  <div class="course-info">
+    <p><strong>Course Code:</strong> <%= course.code %></p>
+    <p><strong>Credits:</strong> <%= course.credits %></p>
+    <p><strong>Description:</strong> <%= course.description %></p>
+  </div>
+  
+  <% if (modules.length === 0) { %>
+    <div class="alert alert-info">
+      No modules found for this course. Please check back later.
+    </div>
+  <% } else { %>
+    <div class="card-container">
+      <% modules.forEach(function(module) { %>
+        <div class="card">
+          <div class="card-header">
+            <h2>Module <%= module.number %></h2>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title"><%= module.name %></h3>
+            <p class="card-text"><strong>Topics:</strong> <%= module.topics.length %></p>
+            <a href="/courses/module/<%= module._id %>/study" class="btn">Start Studying</a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

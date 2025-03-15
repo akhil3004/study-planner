@@ -1,0 +1,69 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="form-container">
+    <h1 class="form-title">Register for Swadhyaya</h1>
+    
+    <% if (typeof error !== 'undefined') { %>
+      <div class="error-message"><%= error %></div>
+    <% } %>
+    
+    <form action="/register" method="POST">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="registerNumber">KTU Register Number</label>
+        <input type="text" id="registerNumber" name="registerNumber" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="branch">Branch</label>
+        <select id="branch" name="branch" required>
+          <option value="">Select Branch</option>
+          <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+          <option value="Electronics and Communication Engineering">Electronics and Communication Engineering</option>
+          <option value="Electrical and Electronics Engineering">Electrical and Electronics Engineering</option>
+          <option value="Mechanical Engineering">Mechanical Engineering</option>
+          <option value="Civil Engineering">Civil Engineering</option>
+          <option value="Information Technology">Information Technology</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="currentSemester">Current Semester</label>
+        <select id="currentSemester" name="currentSemester" required>
+          <option value="">Select Semester</option>
+          <option value="1">Semester 1</option>
+          <option value="2">Semester 2</option>
+          <option value="3">Semester 3</option>
+          <option value="4">Semester 4</option>
+          <option value="5">Semester 5</option>
+          <option value="6">Semester 6</option>
+          <option value="7">Semester 7</option>
+          <option value="8">Semester 8</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn btn-block">Register</button>
+    </form>
+    
+    <p class="text-center mt-3">
+      Already have an account? <a href="/login">Login</a>
+    </p>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

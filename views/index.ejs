@@ -1,0 +1,128 @@
+<%- include('partials/header') %>
+
+<div class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <h1>Welcome to Swadhyaya</h1>
+      <h2>Your Personalized KTU Study Planner</h2>
+      <p>Organize your study sessions, track your progress, and ace your exams with our specialized study planning platform designed specifically for KTU students.</p>
+      
+      <div class="hero-buttons">
+        <% if (typeof user !== 'undefined') { %>
+          <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+        <% } else { %>
+          <a href="/register" class="btn btn-primary">Get Started</a>
+          <a href="/login" class="btn btn-secondary">Login</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="features">
+  <div class="container">
+    <h2 class="section-title">Features</h2>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>KTU Curriculum</h3>
+        <p>Access courses organized by semester and branch according to the official KTU syllabus.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">⏱️</div>
+        <h3>Timed Study Sessions</h3>
+        <p>Use our built-in timer to follow the recommended study duration for each module.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>Module Quizzes</h3>
+        <p>Test your knowledge with quizzes designed to reinforce your understanding of each module.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Progress Tracking</h3>
+        <p>Monitor your study progress and identify areas that need improvement.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works">
+  <div class="container">
+    <h2 class="section-title">How It Works</h2>
+    
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Create an Account</h3>
+        <p>Register with your KTU credentials and select your branch and semester.</p>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Choose a Course</h3>
+        <p>Browse through the courses available for your semester and branch.</p>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Select a Module</h3>
+        <p>Pick a module you want to study from your selected course.</p>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">4</div>
+        <h3>Complete Study Session</h3>
+        <p>Follow the timed study session and review the provided resources.</p>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">5</div>
+        <h3>Take the Quiz</h3>
+        <p>Test your understanding with a module quiz and track your progress.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="container">
+    <h2 class="section-title">Student Testimonials</h2>
+    
+    <div class="testimonial-slider">
+      <div class="testimonial">
+        <p class="testimonial-text">"Swadhyaya helped me organize my study schedule and stay on track with the KTU syllabus. The module quizzes are especially helpful for exam preparation."</p>
+        <p class="testimonial-author">- Anju S, S6 CSE</p>
+      </div>
+      
+      <div class="testimonial">
+        <p class="testimonial-text">"The timed study sessions helped me develop better focus and improved my productivity. I've seen a significant improvement in my grades since I started using Swadhyaya."</p>
+        <p class="testimonial-author">- Rahul K, S4 ECE</p>
+      </div>
+      
+      <div class="testimonial">
+        <p class="testimonial-text">"As a first-year KTU student, Swadhyaya made it easy for me to understand the curriculum structure and plan my studies effectively."</p>
+        <p class="testimonial-author">- Meera J, S2 ME</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>Ready to Improve Your Study Habits?</h2>
+    <p>Join thousands of KTU students who have transformed their academic performance with Swadhyaya.</p>
+    
+    <% if (typeof user === 'undefined') { %>
+      <a href="/register" class="btn btn-large">Sign Up Now</a>
+    <% } else { %>
+      <a href="/dashboard" class="btn btn-large">Go to Dashboard</a>
+    <% } %>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
