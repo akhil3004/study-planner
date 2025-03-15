@@ -4,7 +4,7 @@
   <div class="form-container">
     <h1 class="form-title">Login to Swadhyaya</h1>
     
-    <% if (typeof error !== 'undefined') { %>
+    <% if (locals.error) { %>
       <div class="error-message"><%= error %></div>
     <% } %>
     

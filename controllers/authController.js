@@ -11,19 +11,19 @@ exports.getRegister = (req, res) => {
 exports.postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.render('login', { error: 'Invalid email or password' });
     }
-
+    
     // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.render('login', { error: 'Invalid email or password' });
     }
-
+    
     // Set session
     req.session.user = {
       id: user._id,
@@ -32,7 +32,7 @@ exports.postLogin = async (req, res) => {
       branch: user.branch,
       semester: user.currentSemester
     };
-
+    
     res.redirect('/dashboard');
   } catch (error) {
     console.error(error);
@@ -43,13 +43,13 @@ exports.postLogin = async (req, res) => {
 exports.postRegister = async (req, res) => {
   try {
     const { name, email, password, registerNumber, branch, currentSemester } = req.body;
-
+    
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { registerNumber }] });
     if (existingUser) {
       return res.render('register', { error: 'Email or Register Number already exists' });
     }
-
+    
     // Create new user
     const user = new User({
       name,
@@ -59,7 +59,7 @@ exports.postRegister = async (req, res) => {
       branch,
       currentSemester: parseInt(currentSemester)
     });
-
+    
     await user.save();
     res.redirect('/login');
   } catch (error) {
@@ -69,8 +69,12 @@ exports.postRegister = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
-  req.session.destroy();
-  res.redirect('/login');
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+    }
+    res.redirect('/login');
+  });
 };
 
 exports.getDashboard = (req, res) => {
@@ -82,7 +86,7 @@ exports.getDashboard = (req, res) => {
 
 // Middleware to check if user is authenticated
 exports.isAuthenticated = (req, res, next) => {
-  if (!req.session.user) {
+  if (!req.session || !req.session.user) {
     return res.redirect('/login');
   }
   next();
