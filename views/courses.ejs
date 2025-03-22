@@ -4,7 +4,10 @@
   <h1>Courses for <%= branch %> - Semester <%= semester %></h1>
   
   <div class="breadcrumb">
-    <span>Dashboard</span> > <span>Semester <%= semester %></span> > <span><%= branch %></span> > <span>Courses</span>
+    <a href="/dashboard">Dashboard</a> > 
+    <a href="/courses/semesters">Semesters</a> > 
+    <a href="/courses/semester/<%= semester %>/branches">Semester <%= semester %></a> > 
+    <span><%= branch %></span>
   </div>
   
   <% if (courses.length === 0) { %>
@@ -12,22 +15,46 @@
       No courses found for this semester and branch. Please check back later.
     </div>
   <% } else { %>
-    <div class="card-container">
+    <div class="courses-container">
       <% courses.forEach(function(course) { %>
-        <div class="card">
-          <div class="card-header">
-            <h2><%= course.code %></h2>
+        <div class="course-card">
+          <div class="course-header">
+            <h2><%= course.name %></h2>
+            <span class="course-code"><%= course.code %></span>
           </div>
-          <div class="card-body">
-            <h3 class="card-title"><%= course.name %></h3>
-            <p class="card-text"><strong>Credits:</strong> <%= course.credits %></p>
-            <p class="card-text"><%= course.description.substring(0, 100) %>...</p>
-            <a href="/courses/course/<%= course._id %>/modules" class="btn">View Modules</a>
+          
+          <div class="modules-container">
+            <% course.modules.forEach(function(module, index) { %>
+              <div class="module-card">
+                <div class="module-header" onclick="toggleModule(this)">
+                  <h3>Module <%= index + 1 %>: <%= module.name %></h3>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="topics-list">
+                  <% module.topics.forEach(function(topic) { %>
+                    <div class="topic-item">
+                      <i class="fas fa-circle"></i>
+                      <span><%= topic %></span>
+                    </div>
+                  <% }); %>
+                </div>
+              </div>
+            <% }); %>
           </div>
         </div>
       <% }); %>
     </div>
   <% } %>
 </div>
+
+<script>
+function toggleModule(header) {
+  const moduleCard = header.parentElement;
+  moduleCard.classList.toggle('expanded');
+  const icon = header.querySelector('i');
+  icon.classList.toggle('fa-chevron-down');
+  icon.classList.toggle('fa-chevron-up');
+}
+</script>
 
 <%- include('partials/footer') %>

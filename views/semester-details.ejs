@@ -1,0 +1,38 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="semester-details">
+    <h1 class="semester-title">Semester <%= semester %></h1>
+    
+    <div class="breadcrumb">
+      <span>Dashboard</span> > <span>Courses</span> > <span>Semester <%= semester %></span>
+    </div>
+
+    <% courses.forEach(function(course) { %>
+      <div class="course-card">
+        <div class="course-header">
+          <h2><%= course.name %></h2>
+          <span class="course-code"><%= course.code %></span>
+        </div>
+        
+        <div class="modules-container">
+          <% course.modules.forEach(function(module, index) { %>
+            <div class="module-card">
+              <h3>Module <%= index + 1 %>: <%= module.name %></h3>
+              <div class="topics-list">
+                <% module.topics.forEach(function(topic) { %>
+                  <div class="topic-item">
+                    <i class="fas fa-circle"></i>
+                    <span><%= topic %></span>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</div>
+
+<%- include('partials/footer') %> 

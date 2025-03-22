@@ -4,7 +4,7 @@
   <h1>Select Semester</h1>
   
   <div class="breadcrumb">
-    <span>Dashboard</span> > <span>Select Semester</span>
+    <a href="/dashboard">Dashboard</a> > <span>Select Semester</span>
   </div>
   
   <div class="card-container">
@@ -14,8 +14,8 @@
           <h2>Semester <%= semester %></h2>
         </div>
         <div class="card-body">
-          <p class="card-text">View courses for Semester <%= semester %></p>
-          <a href="/courses/semester/<%= semester %>/branches" class="btn">Select</a>
+          <p class="card-text">View courses and study materials for Semester <%= semester %></p>
+          <a href="/courses/semester/<%= semester %>/branches" class="btn btn-primary">Select</a>
         </div>
       </div>
     <% }); %>
