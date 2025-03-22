@@ -1,13 +1,16 @@
 const User = require('../models/User');
 
+// Login page
 exports.getLogin = (req, res) => {
   res.render('login');
 };
 
+// Register page
 exports.getRegister = (req, res) => {
   res.render('register');
 };
 
+// Login submission
 exports.postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -40,6 +43,7 @@ exports.postLogin = async (req, res) => {
   }
 };
 
+// Register submission
 exports.postRegister = async (req, res) => {
   try {
     const { name, email, password, registerNumber, branch, currentSemester } = req.body;
@@ -68,6 +72,7 @@ exports.postRegister = async (req, res) => {
   }
 };
 
+// Logout
 exports.logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -77,11 +82,15 @@ exports.logout = (req, res) => {
   });
 };
 
+// Dashboard page
 exports.getDashboard = (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
-  res.render('dashboard', { user: req.session.user });
+  res.render('dashboard', { 
+    user: req.session.user,
+    page: 'dashboard'
+  });
 };
 
 // Middleware to check if user is authenticated
@@ -90,4 +99,151 @@ exports.isAuthenticated = (req, res, next) => {
     return res.redirect('/login');
   }
   next();
+};
+
+// Profile page
+exports.getProfile = (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+  
+  User.findById(req.session.user.id)
+    .then(user => {
+      if (!user) {
+        return res.redirect('/dashboard');
+      }
+      res.render('profile', { 
+        user,
+        query: req.query
+      });
+    })
+    .catch(err => {
+      console.error('Error fetching profile:', err);
+      res.redirect('/dashboard');
+    });
+};
+
+// Edit profile page
+exports.getEditProfile = (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+  
+  User.findById(req.session.user.id)
+    .then(user => {
+      if (!user) {
+        return res.redirect('/dashboard');
+      }
+      res.render('edit-profile', { user });
+    })
+    .catch(err => {
+      console.error('Error fetching user for edit:', err);
+      res.redirect('/dashboard');
+    });
+};
+
+// Update profile
+exports.updateProfile = async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    
+    const { name, email, branch, currentSemester } = req.body;
+    
+    // Check if email is already in use by another user
+    const existingUser = await User.findOne({ 
+      email, 
+      _id: { $ne: req.session.user.id } 
+    });
+    
+    if (existingUser) {
+      const user = await User.findById(req.session.user.id);
+      return res.render('edit-profile', { 
+        user,
+        error: 'Email is already in use by another account' 
+      });
+    }
+    
+    // Update user in database
+    const updatedUser = await User.findByIdAndUpdate(
+      req.session.user.id,
+      { 
+        name, 
+        email, 
+        branch, 
+        currentSemester: parseInt(currentSemester) 
+      },
+      { new: true }
+    );
+    
+    if (!updatedUser) {
+      return res.redirect('/dashboard');
+    }
+    
+    // Update session data
+    req.session.user = {
+      id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      branch: updatedUser.branch,
+      semester: updatedUser.currentSemester
+    };
+    
+    res.redirect('/profile?success=true');
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    const user = await User.findById(req.session.user.id);
+    res.render('edit-profile', { 
+      user,
+      error: 'An error occurred while updating your profile' 
+    });
+  }
+};
+
+// Change password
+exports.changePassword = async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    
+    // Get user
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      return res.redirect('/login');
+    }
+    
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.render('edit-profile', { 
+        user,
+        error: 'Current password is incorrect' 
+      });
+    }
+    
+    // Check if new passwords match
+    if (newPassword !== confirmPassword) {
+      return res.render('edit-profile', { 
+        user,
+        error: 'New passwords do not match' 
+      });
+    }
+    
+    // Update password
+    user.password = newPassword;
+    await user.save();
+    
+    res.redirect('/profile?passwordChanged=true');
+  } catch (error) {
+    console.error('Error changing password:', error);
+    const user = await User.findById(req.session.user.id);
+    res.render('edit-profile', { 
+      user,
+      error: 'An error occurred while changing your password' 
+    });
+  }
 };

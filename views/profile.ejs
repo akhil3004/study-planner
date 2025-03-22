@@ -1,0 +1,124 @@
+<!-- Create a new file: views/profile.ejs -->
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="profile-container">
+    <h1 class="profile-title">My Profile</h1>
+    
+    <% if (locals.error) { %>
+      <div class="error-message"><%= error %></div>
+    <% } %>
+    
+    <% if (locals.success) { %>
+      <div class="success-message"><%= success %></div>
+    <% } %>
+    
+    <div class="profile-content">
+      <div class="profile-section">
+        <h2>Personal Information</h2>
+        <form action="/update-profile" method="POST" class="profile-form">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" value="<%= user.name %>" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="<%= user.email %>" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="branch">Branch</label>
+            <select id="branch" name="branch" required>
+              <option value="">Select Branch</option>
+              <option value="Computer Science and Engineering" <%= user.branch === 'Computer Science and Engineering' ? 'selected' : '' %>>Computer Science and Engineering</option>
+              <option value="Electronics and Communication Engineering" <%= user.branch === 'Electronics and Communication Engineering' ? 'selected' : '' %>>Electronics and Communication Engineering</option>
+              <option value="Electrical and Electronics Engineering" <%= user.branch === 'Electrical and Electronics Engineering' ? 'selected' : '' %>>Electrical and Electronics Engineering</option>
+              <option value="Mechanical Engineering" <%= user.branch === 'Mechanical Engineering' ? 'selected' : '' %>>Mechanical Engineering</option>
+              <option value="Civil Engineering" <%= user.branch === 'Civil Engineering' ? 'selected' : '' %>>Civil Engineering</option>
+              <option value="Information Technology" <%= user.branch === 'Information Technology' ? 'selected' : '' %>>Information Technology</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="currentSemester">Current Semester</label>
+            <select id="currentSemester" name="currentSemester" required>
+              <option value="">Select Semester</option>
+              <% for(let i = 1; i <= 8; i++) { %>
+                <option value="<%= i %>" <%= user.currentSemester === i ? 'selected' : '' %>>Semester <%= i %></option>
+              <% } %>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="scheme">Scheme</label>
+            <select id="scheme" name="scheme" required>
+              <option value="">Select Scheme</option>
+              <option value="2015-2019" <%= user.scheme === '2015-2019' ? 'selected' : '' %>>2015-2019</option>
+              <option value="2020-2024" <%= user.scheme === '2020-2024' ? 'selected' : '' %>>2020-2024</option>
+              <option value="2025-2029" <%= user.scheme === '2025-2029' ? 'selected' : '' %>>2025-2029</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+      </div>
+      
+      <div class="profile-section">
+        <h2>Change Password</h2>
+        <form action="/change-password" method="POST" class="profile-form">
+          <div class="form-group">
+            <label for="currentPassword">Current Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="currentPassword" name="currentPassword" required>
+              <span class="password-toggle" onclick="togglePassword('currentPassword')">
+                <i class="fas fa-eye"></i>
+              </span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="newPassword" name="newPassword" required>
+              <span class="password-toggle" onclick="togglePassword('newPassword')">
+                <i class="fas fa-eye"></i>
+              </span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="confirmPassword">Confirm New Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="confirmPassword" name="confirmPassword" required>
+              <span class="password-toggle" onclick="togglePassword('confirmPassword')">
+                <i class="fas fa-eye"></i>
+              </span>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Change Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script>
+function togglePassword(inputId) {
+  const input = document.getElementById(inputId);
+  const icon = input.nextElementSibling.querySelector('i');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+</script>

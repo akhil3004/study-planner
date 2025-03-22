@@ -51,7 +51,7 @@ app.use('/quizzes', quizRoutes);
 
 // Basic route for home page
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('index', { page: 'home' });
 });
 
 // Direct routes for authentication
@@ -63,6 +63,9 @@ app.get('/logout', authController.logout);
 
 // Protected routes
 app.get('/dashboard', authController.isAuthenticated, authController.getDashboard);
+app.get('/profile', authController.isAuthenticated, authController.getProfile);
+app.post('/update-profile', authController.isAuthenticated, authController.updateProfile);
+app.post('/change-password', authController.isAuthenticated, authController.changePassword);
 
 // Start the server
 app.listen(PORT, () => {
