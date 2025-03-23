@@ -1,5 +1,13 @@
 <%- include('partials/header') %>
 
+<!-- Notification Permission Request Banner (add at the top of the body) -->
+<div id="notificationPermissionBanner" style="display: none; background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px; text-align: center;">
+  <p>Enable notifications to receive reminders for your scheduled study sessions.</p>
+  <button id="enableNotificationsBtn" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-left: 10px;">
+    Enable Notifications
+  </button>
+</div>
+
 <div class="container">
   <h1>Courses for <%= branch %> - Semester <%= semester %></h1>
   
@@ -31,18 +39,25 @@
                   <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="module-content">
-                  <div class="module-header">
-                    <h3><%= module.name %></h3>
+                  <div class="module-actions-container">
                     <div class="module-actions">
-                      <button class="btn btn-primary start-study-btn" data-module-id="module-<%= index %>">
+                      <button type="button" class="btn btn-primary start-study-btn" data-module-id="<%= module._id || module.name %>">
                         Start Study Session
                       </button>
-                      <button class="btn btn-success finish-study-btn" data-module-id="module-<%= index %>" style="display: none;">
-                        Finish Session
-                      </button>
-                      <button class="btn btn-info take-quiz-btn" data-module-id="module-<%= index %>">
-                        Take Quiz
-                      </button>
+                      <div class="study-session-buttons" style="display: none;">
+                        <button type="button" class="btn btn-warning reschedule-btn" 
+                                data-module-id="<%= module._id || module.name %>" 
+                                data-module-name="<%= module.name %>"
+                                data-course-name="<%= course.name %>">
+                          Reschedule
+                        </button>
+                        <button type="button" class="btn btn-success finish-study-btn" data-module-id="<%= module._id || module.name %>">
+                          Finish Session
+                        </button>
+                        <button type="button" class="btn btn-info take-quiz-btn" data-module-id="<%= module._id || module.name %>">
+                          Take Quiz
+                        </button>
+                      </div>
                       <div class="study-timer" style="display: none;">
                         <span class="timer-display">00:00:00</span>
                       </div>
@@ -72,6 +87,28 @@
   <% } %>
 </div>
 
+<!-- Add this before the closing body tag -->
+<!-- Reschedule Modal -->
+<div id="rescheduleModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+  <div style="background-color: white; padding: 20px; border-radius: 5px; width: 400px; max-width: 90%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <h3 style="margin-bottom: 15px; font-size: 1.5rem; font-weight: bold;">Schedule Study Session</h3>
+    <form id="rescheduleForm">
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 5px;">Select Date and Time</label>
+        <input type="datetime-local" id="sessionDateTime" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="cancel-reschedule" style="padding: 8px 16px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Cancel
+        </button>
+        <button type="submit" style="padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Confirm
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 function toggleModule(header) {
   const moduleCard = header.parentElement;
@@ -84,18 +121,124 @@ function toggleModule(header) {
 document.addEventListener('DOMContentLoaded', function() {
   let startTimes = {};
   let timerIntervals = {};
+  
+  // Check if browser supports notifications
+  if ('Notification' in window) {
+    // Check if notification permission has been granted
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      // Show notification permission banner
+      document.getElementById('notificationPermissionBanner').style.display = 'block';
+    }
+    
+    // Handle enable notifications button click
+    document.getElementById('enableNotificationsBtn').addEventListener('click', function() {
+      requestNotificationPermission();
+    });
+  }
+  
+  // Function to request notification permission
+  function requestNotificationPermission() {
+    Notification.requestPermission().then(function(permission) {
+      if (permission === 'granted') {
+        // Hide the banner
+        document.getElementById('notificationPermissionBanner').style.display = 'none';
+        // Show confirmation
+        showNotification('Notifications Enabled', 'You will now receive notifications for your scheduled study sessions.');
+      }
+    });
+  }
+  
+  // Function to show a notification
+  function showNotification(title, message) {
+    if (Notification.permission === 'granted') {
+      const notification = new Notification(title, {
+        body: message,
+        icon: '/img/logo.png' // Add your logo path here
+      });
+      
+      notification.onclick = function() {
+        window.focus();
+        this.close();
+      };
+    }
+  }
+  
+  // Schedule a local notification
+  function scheduleLocalNotification(scheduledDate, moduleName, courseName) {
+    const scheduleTime = new Date(scheduledDate).getTime();
+    const currentTime = new Date().getTime();
+    const timeUntilNotification = scheduleTime - currentTime - (30 * 60 * 1000); // 30 minutes before
+    
+    if (timeUntilNotification > 0) {
+      // Store the notification data in localStorage
+      const notificationData = {
+        id: Date.now(),
+        title: 'Study Session Reminder',
+        message: `Your study session for ${moduleName} (${courseName}) is scheduled in 30 minutes.`,
+        time: scheduleTime - (30 * 60 * 1000)
+      };
+      
+      // Save to localStorage
+      const savedNotifications = JSON.parse(localStorage.getItem('scheduledNotifications') || '[]');
+      savedNotifications.push(notificationData);
+      localStorage.setItem('scheduledNotifications', JSON.stringify(savedNotifications));
+      
+      // Schedule the notification
+      setTimeout(function() {
+        showNotification(notificationData.title, notificationData.message);
+      }, timeUntilNotification);
+      
+      console.log(`Notification scheduled for ${new Date(notificationData.time).toLocaleString()}`);
+    }
+  }
+  
+  // Check for pending notifications on page load
+  function checkPendingNotifications() {
+    const savedNotifications = JSON.parse(localStorage.getItem('scheduledNotifications') || '[]');
+    const currentTime = new Date().getTime();
+    
+    savedNotifications.forEach(notification => {
+      const timeUntilNotification = notification.time - currentTime;
+      
+      if (timeUntilNotification > 0) {
+        // Reschedule the notification
+        setTimeout(function() {
+          showNotification(notification.title, notification.message);
+        }, timeUntilNotification);
+        
+        console.log(`Pending notification rescheduled for ${new Date(notification.time).toLocaleString()}`);
+      }
+    });
+  }
+  
+  // Check for pending notifications on page load
+  checkPendingNotifications();
 
-  // Start study session
-  document.querySelectorAll('.start-study-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const moduleId = this.dataset.moduleId;
-      const moduleContent = this.closest('.module-content');
+  // Reschedule functionality
+  const rescheduleModal = document.getElementById('rescheduleModal');
+  const rescheduleForm = document.getElementById('rescheduleForm');
+  let currentModuleId = null;
+  let currentModuleName = null;
+  let currentCourseName = null;
+
+  // Study session buttons
+  document.addEventListener('click', function(e) {
+    // Stop event propagation for buttons
+    if (e.target.closest('button')) {
+      e.stopPropagation();
+    }
+
+    // Handle start study button clicks
+    if (e.target.closest('.start-study-btn')) {
+      const button = e.target.closest('.start-study-btn');
+      const moduleId = button.dataset.moduleId;
+      const moduleContent = button.closest('.module-content');
       const timerDisplay = moduleContent.querySelector('.timer-display');
       const topicsList = moduleContent.querySelector('.topics-list');
       
-      // Show timer and finish button
-      this.style.display = 'none';
-      moduleContent.querySelector('.finish-study-btn').style.display = 'block';
+      // Show timer and study session buttons
+      button.style.display = 'none';
+      moduleContent.querySelector('.study-session-buttons').style.display = 'flex';
       moduleContent.querySelector('.study-timer').style.display = 'block';
       
       // Show checkboxes
@@ -115,14 +258,43 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 1000);
       
       timerIntervals[moduleId] = timer;
-    });
-  });
+    }
 
-  // Finish study session
-  document.querySelectorAll('.finish-study-btn').forEach(btn => {
-    btn.addEventListener('click', async function() {
-      const moduleId = this.dataset.moduleId;
-      const moduleContent = this.closest('.module-content');
+    // Handle reschedule button clicks
+    if (e.target.closest('.reschedule-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      const button = e.target.closest('.reschedule-btn');
+      currentModuleId = button.dataset.moduleId;
+      currentModuleName = button.dataset.moduleName;
+      currentCourseName = button.dataset.courseName;
+      
+      console.log('Reschedule button clicked:', { 
+        currentModuleId, 
+        currentModuleName, 
+        currentCourseName 
+      });
+      
+      // Set minimum date to current date and time
+      const now = new Date();
+      now.setMinutes(now.getMinutes() + 30); // Minimum 30 minutes from now
+      const minDateTime = now.toISOString().slice(0, 16);
+      document.getElementById('sessionDateTime').min = minDateTime;
+      
+      // Show modal with regular display property
+      rescheduleModal.style.display = 'block';
+    }
+
+    // Handle cancel button clicks
+    if (e.target.closest('.cancel-reschedule')) {
+      rescheduleModal.style.display = 'none';
+    }
+
+    // Handle finish study button clicks
+    if (e.target.closest('.finish-study-btn')) {
+      const button = e.target.closest('.finish-study-btn');
+      const moduleId = button.dataset.moduleId;
+      const moduleContent = button.closest('.module-content');
       const timerDisplay = moduleContent.querySelector('.timer-display');
       const topicsList = moduleContent.querySelector('.topics-list');
       
@@ -137,144 +309,112 @@ document.addEventListener('DOMContentLoaded', function() {
       const completedTopics = Array.from(topicsList.querySelectorAll('.topic-checkbox:checked'))
         .map(checkbox => checkbox.value);
       
-      try {
-        console.log('Saving progress with:', {
-          moduleId,
-          completedTopics,
-          studyTime
-        });
+      // Save progress
+      saveStudyProgress(moduleId, completedTopics, studyTime, moduleContent);
+    }
 
-        const response = await fetch('/courses/api/study-progress', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            moduleId: moduleId,
-            completedTopics: completedTopics,
-            studyTime: studyTime
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to save progress' }));
-          throw new Error(errorData.error || 'Failed to save progress');
-        }
-
-        const data = await response.json();
-        console.log('Progress saved successfully:', data);
-        
-        // Reset UI
-        this.style.display = 'none';
-        moduleContent.querySelector('.start-study-btn').style.display = 'block';
-        moduleContent.querySelector('.study-timer').style.display = 'none';
-        
-        // Hide checkboxes
-        moduleContent.querySelectorAll('.topic-checkbox').forEach(checkbox => {
-          checkbox.style.display = 'none';
-        });
-        
-        // Clear start time and timer interval
-        delete startTimes[moduleId];
-        delete timerIntervals[moduleId];
-        
-        alert('Study session completed successfully!');
-      } catch (error) {
-        console.error('Error saving progress:', error);
-        alert(error.message || 'Failed to save study progress. Please try again.');
-      }
-    });
-  });
-
-  // Take Quiz button handler
-  document.querySelectorAll('.take-quiz-btn').forEach(button => {
-    button.addEventListener('click', async (e) => {
+    // Handle take quiz button clicks
+    if (e.target.closest('.take-quiz-btn')) {
       e.preventDefault();
       alert('Quiz functionality is under construction. Please check back later!');
-      return;
-      
-      // Original quiz code commented out for now
-      /*
-      const moduleId = e.target.dataset.moduleId;
-      const moduleName = e.target.dataset.moduleName;
-      
-      try {
-        const response = await fetch('/api/quiz/generate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ moduleId })
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to generate quiz');
-        }
-        
-        const quiz = await response.json();
-        
-        // Show quiz modal
-        const quizModal = document.getElementById('quizModal');
-        const quizContent = document.getElementById('quizContent');
-        quizContent.innerHTML = `
-          <h3>${moduleName} Quiz</h3>
-          <form id="quizForm">
-            ${quiz.questions.map((q, i) => `
-              <div class="mb-4">
-                <p class="font-medium">${i + 1}. ${q.question}</p>
-                ${q.options.map((opt, j) => `
-                  <div class="flex items-center mt-2">
-                    <input type="radio" name="q${i}" value="${j}" class="mr-2" required>
-                    <label>${opt}</label>
-                  </div>
-                `).join('')}
-              </div>
-            `).join('')}
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-              Submit Quiz
-            </button>
-          </form>
-        `;
-        
-        quizModal.classList.remove('hidden');
-        
-        // Handle quiz submission
-        document.getElementById('quizForm').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const answers = quiz.questions.map((_, i) => parseInt(e.target[`q${i}`].value));
-          
-          try {
-            const response = await fetch('/api/quiz/submit', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                moduleId,
-                answers
-              })
-            });
-            
-            if (!response.ok) {
-              throw new Error('Failed to submit quiz');
-            }
-            
-            const result = await response.json();
-            alert(`Quiz completed! Your score: ${result.score}%`);
-            quizModal.classList.add('hidden');
-          } catch (error) {
-            console.error('Error submitting quiz:', error);
-            alert('Failed to submit quiz. Please try again.');
-          }
-        });
-      } catch (error) {
-        console.error('Error generating quiz:', error);
-        alert('Failed to generate quiz. Please try again.');
-      }
-      */
-    });
+    }
   });
+
+  // Form submission handler
+  rescheduleForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const scheduledDate = document.getElementById('sessionDateTime').value;
+    console.log('Submitting schedule:', { currentModuleId, currentModuleName, currentCourseName, scheduledDate });
+
+    try {
+      const response = await fetch('/courses/api/study-sessions/schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          moduleId: currentModuleId,
+          moduleName: currentModuleName,
+          courseName: currentCourseName,
+          scheduledDate: new Date(scheduledDate)
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to schedule session');
+      }
+
+      const result = await response.json();
+      // Set browser notification for the session
+      scheduleLocalNotification(scheduledDate, currentModuleName, currentCourseName);
+      
+      // Success message
+      let message = 'Study session scheduled successfully! ';
+      if (Notification.permission === 'granted') {
+        message += 'You will receive a browser notification 30 minutes before the session.';
+      } else {
+        message += 'Enable browser notifications to receive reminders.';
+      }
+      
+      alert(message);
+      rescheduleModal.style.display = 'none';
+    } catch (error) {
+      console.error('Error scheduling session:', error);
+      alert(error.message || 'Failed to schedule session. Please try again.');
+    }
+  });
+
+  // Helper function to save study progress
+  async function saveStudyProgress(moduleId, completedTopics, studyTime, moduleContent) {
+    try {
+      console.log('Saving progress with:', {
+        moduleId,
+        completedTopics,
+        studyTime
+      });
+
+      const response = await fetch('/courses/api/study-progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          moduleId: moduleId,
+          completedTopics: completedTopics,
+          studyTime: studyTime
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to save progress' }));
+        throw new Error(errorData.error || 'Failed to save progress');
+      }
+
+      const data = await response.json();
+      console.log('Progress saved successfully:', data);
+      
+      // Reset UI
+      moduleContent.querySelector('.study-session-buttons').style.display = 'none';
+      moduleContent.querySelector('.start-study-btn').style.display = 'block';
+      moduleContent.querySelector('.study-timer').style.display = 'none';
+      
+      // Hide checkboxes
+      moduleContent.querySelectorAll('.topic-checkbox').forEach(checkbox => {
+        checkbox.style.display = 'none';
+      });
+      
+      // Clear start time and timer interval
+      delete startTimes[moduleId];
+      delete timerIntervals[moduleId];
+      
+      alert('Study session completed successfully!');
+    } catch (error) {
+      console.error('Error saving progress:', error);
+      alert(error.message || 'Failed to save study progress. Please try again.');
+    }
+  }
 });
 </script>
 
@@ -432,6 +572,45 @@ document.addEventListener('DOMContentLoaded', function() {
 .quiz-content button {
   width: 100%;
   margin-top: 1rem;
+}
+
+.study-session-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.study-session-buttons .btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 120px;
+  text-align: center;
+}
+
+.study-session-buttons .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.study-session-buttons .btn-warning {
+  background-color: #ffc107;
+  color: #000;
+  border: 1px solid #ffc107;
+}
+
+.study-session-buttons .btn-success {
+  background-color: #28a745;
+  color: #fff;
+  border: 1px solid #28a745;
+}
+
+.study-session-buttons .btn-info {
+  background-color: #17a2b8;
+  color: #fff;
+  border: 1px solid #17a2b8;
 }
 </style>
 
