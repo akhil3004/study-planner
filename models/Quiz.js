@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 
 const quizSchema = new mongoose.Schema({
   moduleId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Module',
+    type: String,
     required: true
   },
-  title: {
-    type: String,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   questions: [{
@@ -20,14 +20,31 @@ const quizSchema = new mongoose.Schema({
       required: true
     }],
     correctAnswer: {
-      type: Number, // Index of correct option
+      type: Number,
       required: true
     },
-    explanation: String
+    topic: {
+      type: String,
+      required: true
+    }
   }],
-  timeLimit: {
-    type: Number, // in minutes
-    default: 15
+  answers: [{
+    type: Number,
+    required: true
+  }],
+  score: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 100
+  },
+  timeTaken: {
+    type: Number,
+    required: true
+  },
+  date: {
+    type: Date,
+    default: Date.now
   }
 });
 

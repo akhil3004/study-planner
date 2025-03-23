@@ -30,13 +30,38 @@
                   <h3>Module <%= index + 1 %>: <%= module.name %></h3>
                   <i class="fas fa-chevron-down"></i>
                 </div>
-                <div class="topics-list">
-                  <% module.topics.forEach(function(topic) { %>
-                    <div class="topic-item">
-                      <i class="fas fa-circle"></i>
-                      <span><%= topic %></span>
+                <div class="module-content">
+                  <div class="module-header">
+                    <h3><%= module.name %></h3>
+                    <div class="module-actions">
+                      <button class="btn btn-primary start-study-btn" data-module-id="module-<%= index %>">
+                        Start Study Session
+                      </button>
+                      <button class="btn btn-success finish-study-btn" data-module-id="module-<%= index %>" style="display: none;">
+                        Finish Session
+                      </button>
+                      <button class="btn btn-info take-quiz-btn" data-module-id="module-<%= index %>">
+                        Take Quiz
+                      </button>
+                      <div class="study-timer" style="display: none;">
+                        <span class="timer-display">00:00:00</span>
+                      </div>
                     </div>
-                  <% }); %>
+                  </div>
+                  <div class="topics-list">
+                    <% module.topics.forEach(topic => { %>
+                      <div class="topic-item">
+                        <input type="checkbox" 
+                               id="topic-<%= module.name %>-<%= topic %>" 
+                               class="topic-checkbox" 
+                               value="<%= topic %>"
+                               style="display: none;">
+                        <label for="topic-<%= module.name %>-<%= topic %>" class="topic-label">
+                          <%= topic %>
+                        </label>
+                      </div>
+                    <% }); %>
+                  </div>
                 </div>
               </div>
             <% }); %>
@@ -55,6 +80,359 @@ function toggleModule(header) {
   icon.classList.toggle('fa-chevron-down');
   icon.classList.toggle('fa-chevron-up');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  let startTimes = {};
+  let timerIntervals = {};
+
+  // Start study session
+  document.querySelectorAll('.start-study-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const moduleId = this.dataset.moduleId;
+      const moduleContent = this.closest('.module-content');
+      const timerDisplay = moduleContent.querySelector('.timer-display');
+      const topicsList = moduleContent.querySelector('.topics-list');
+      
+      // Show timer and finish button
+      this.style.display = 'none';
+      moduleContent.querySelector('.finish-study-btn').style.display = 'block';
+      moduleContent.querySelector('.study-timer').style.display = 'block';
+      
+      // Show checkboxes
+      moduleContent.querySelectorAll('.topic-checkbox').forEach(checkbox => {
+        checkbox.style.display = 'block';
+      });
+      
+      startTimes[moduleId] = Date.now();
+      
+      // Start timer
+      const timer = setInterval(() => {
+        const elapsed = Date.now() - startTimes[moduleId];
+        const hours = Math.floor(elapsed / 3600000);
+        const minutes = Math.floor((elapsed % 3600000) / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        timerDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }, 1000);
+      
+      timerIntervals[moduleId] = timer;
+    });
+  });
+
+  // Finish study session
+  document.querySelectorAll('.finish-study-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const moduleId = this.dataset.moduleId;
+      const moduleContent = this.closest('.module-content');
+      const timerDisplay = moduleContent.querySelector('.timer-display');
+      const topicsList = moduleContent.querySelector('.topics-list');
+      
+      // Calculate study time
+      const studyTime = Date.now() - startTimes[moduleId];
+      
+      // Clear timer
+      clearInterval(timerIntervals[moduleId]);
+      timerDisplay.textContent = '00:00:00';
+      
+      // Get completed topics
+      const completedTopics = Array.from(topicsList.querySelectorAll('.topic-checkbox:checked'))
+        .map(checkbox => checkbox.value);
+      
+      try {
+        console.log('Saving progress with:', {
+          moduleId,
+          completedTopics,
+          studyTime
+        });
+
+        const response = await fetch('/courses/api/study-progress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            moduleId: moduleId,
+            completedTopics: completedTopics,
+            studyTime: studyTime
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Failed to save progress' }));
+          throw new Error(errorData.error || 'Failed to save progress');
+        }
+
+        const data = await response.json();
+        console.log('Progress saved successfully:', data);
+        
+        // Reset UI
+        this.style.display = 'none';
+        moduleContent.querySelector('.start-study-btn').style.display = 'block';
+        moduleContent.querySelector('.study-timer').style.display = 'none';
+        
+        // Hide checkboxes
+        moduleContent.querySelectorAll('.topic-checkbox').forEach(checkbox => {
+          checkbox.style.display = 'none';
+        });
+        
+        // Clear start time and timer interval
+        delete startTimes[moduleId];
+        delete timerIntervals[moduleId];
+        
+        alert('Study session completed successfully!');
+      } catch (error) {
+        console.error('Error saving progress:', error);
+        alert(error.message || 'Failed to save study progress. Please try again.');
+      }
+    });
+  });
+
+  // Take Quiz button handler
+  document.querySelectorAll('.take-quiz-btn').forEach(button => {
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+      alert('Quiz functionality is under construction. Please check back later!');
+      return;
+      
+      // Original quiz code commented out for now
+      /*
+      const moduleId = e.target.dataset.moduleId;
+      const moduleName = e.target.dataset.moduleName;
+      
+      try {
+        const response = await fetch('/api/quiz/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ moduleId })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to generate quiz');
+        }
+        
+        const quiz = await response.json();
+        
+        // Show quiz modal
+        const quizModal = document.getElementById('quizModal');
+        const quizContent = document.getElementById('quizContent');
+        quizContent.innerHTML = `
+          <h3>${moduleName} Quiz</h3>
+          <form id="quizForm">
+            ${quiz.questions.map((q, i) => `
+              <div class="mb-4">
+                <p class="font-medium">${i + 1}. ${q.question}</p>
+                ${q.options.map((opt, j) => `
+                  <div class="flex items-center mt-2">
+                    <input type="radio" name="q${i}" value="${j}" class="mr-2" required>
+                    <label>${opt}</label>
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              Submit Quiz
+            </button>
+          </form>
+        `;
+        
+        quizModal.classList.remove('hidden');
+        
+        // Handle quiz submission
+        document.getElementById('quizForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const answers = quiz.questions.map((_, i) => parseInt(e.target[`q${i}`].value));
+          
+          try {
+            const response = await fetch('/api/quiz/submit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                moduleId,
+                answers
+              })
+            });
+            
+            if (!response.ok) {
+              throw new Error('Failed to submit quiz');
+            }
+            
+            const result = await response.json();
+            alert(`Quiz completed! Your score: ${result.score}%`);
+            quizModal.classList.add('hidden');
+          } catch (error) {
+            console.error('Error submitting quiz:', error);
+            alert('Failed to submit quiz. Please try again.');
+          }
+        });
+      } catch (error) {
+        console.error('Error generating quiz:', error);
+        alert('Failed to generate quiz. Please try again.');
+      }
+      */
+    });
+  });
+});
 </script>
+
+<style>
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.module-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.study-timer {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2c3e50;
+  background-color: #f8f9fa;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+  min-width: 100px;
+  text-align: center;
+}
+
+.timer-display {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+.study-session-content {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.topic-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background-color: #fff;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.topic-item:hover {
+  background-color: #f8f9fa;
+}
+
+.topic-checkbox {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+  accent-color: #28a745;
+}
+
+.topic-label {
+  flex: 1;
+  cursor: pointer;
+  user-select: none;
+  color: #495057;
+}
+
+.topic-item input[type="checkbox"]:checked + .topic-label {
+  color: #28a745;
+  text-decoration: line-through;
+}
+
+.topic-text {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .module-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .study-timer {
+    margin: 0.5rem 0;
+  }
+}
+
+/* Quiz Modal Styles */
+.quiz-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.quiz-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.quiz-content h2 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.quiz-content p {
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+.question {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.question p {
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.question label {
+  display: block;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.question label:hover {
+  background-color: #e9ecef;
+}
+
+.question input[type="radio"] {
+  margin-right: 0.5rem;
+}
+
+.quiz-content button {
+  width: 100%;
+  margin-top: 1rem;
+}
+</style>
 
 <%- include('partials/footer') %>

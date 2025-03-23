@@ -63,9 +63,6 @@ app.get('/logout', authController.logout);
 
 // Protected routes
 app.get('/dashboard', authController.isAuthenticated, authController.getDashboard);
-app.get('/profile', authController.isAuthenticated, authController.getProfile);
-app.post('/update-profile', authController.isAuthenticated, authController.updateProfile);
-app.post('/change-password', authController.isAuthenticated, authController.changePassword);
 
 // Semester details route
 app.get('/courses/semester/:semester/branch/:branch', (req, res) => {

@@ -1,0 +1,223 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <h2>My Progress</h2>
+  
+  <!-- Study Progress Section -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h4>Study Progress</h4>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="stat-box">
+            <h6>Total Study Sessions</h6>
+            <p class="stat-number"><%= progress.length %></p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-box">
+            <h6>Total Study Time</h6>
+            <p class="stat-number"><%= formatTotalStudyTime(progress) %></p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-box">
+            <h6>Completed Topics</h6>
+            <p class="stat-number"><%= progress.reduce((total, session) => total + session.completedTopics.length, 0) %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline mt-4">
+        <h5>Study History</h5>
+        <% progress.forEach(session => { %>
+          <div class="timeline-item">
+            <div class="timeline-date">
+              <%= new Date(session.date).toLocaleDateString() %>
+            </div>
+            <div class="timeline-content">
+              <h6><%= session.moduleId.name %></h6>
+              <p>Study Time: <%= Math.floor(session.studyTime / 60000) %> minutes</p>
+              <p>Completed Topics: <%= session.completedTopics.length %></p>
+              <ul class="list-unstyled">
+                <% session.completedTopics.forEach(topic => { %>
+                  <li><i class="fas fa-check text-success"></i> <%= topic %></li>
+                <% }); %>
+              </ul>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Progress Section -->
+  <div class="card">
+    <div class="card-header">
+      <h4>Quiz Progress</h4>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="stat-box">
+            <h6>Total Quizzes Taken</h6>
+            <p class="stat-number"><%= quizResults ? quizResults.length : 0 %></p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-box">
+            <h6>Average Score</h6>
+            <p class="stat-number">
+              <%= quizResults && quizResults.length > 0 
+                ? (quizResults.reduce((sum, quiz) => sum + quiz.score, 0) / quizResults.length).toFixed(1) + '%'
+                : '0%' %>
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-box">
+            <h6>Best Score</h6>
+            <p class="stat-number">
+              <%= quizResults && quizResults.length > 0
+                ? Math.max(...quizResults.map(quiz => quiz.score)) + '%'
+                : '0%' %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline mt-4">
+        <h5>Quiz History</h5>
+        <% if (quizResults && quizResults.length > 0) { %>
+          <% quizResults.forEach(quiz => { %>
+            <div class="timeline-item">
+              <div class="timeline-date">
+                <%= new Date(quiz.date).toLocaleDateString() %>
+              </div>
+              <div class="timeline-content">
+                <h6><%= quiz.moduleId.name %></h6>
+                <p>Score: <%= quiz.score %>%</p>
+                <p>Time Taken: <%= Math.floor(quiz.timeTaken / 60) %> minutes</p>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p class="text-muted">No quiz results yet.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.stat-box {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0.5rem 0;
+}
+
+.timeline {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 2rem;
+  margin-bottom: 2rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e9ecef;
+}
+
+.timeline-item::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #007bff;
+}
+
+.timeline-date {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-content {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timeline-content h6 {
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.timeline-content p {
+  margin-bottom: 0.5rem;
+  color: #6c757d;
+}
+
+.timeline-content ul {
+  margin-top: 0.5rem;
+}
+
+.timeline-content li {
+  margin-bottom: 0.25rem;
+}
+</style>
+
+<script>
+function formatDate(date) {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function formatStudyTime(milliseconds) {
+  const hours = Math.floor(milliseconds / 3600000);
+  const minutes = Math.floor((milliseconds % 3600000) / 60000);
+  const seconds = Math.floor((milliseconds % 60000) / 1000);
+  
+  return `${hours}h ${minutes}m ${seconds}s`;
+}
+
+function formatTotalStudyTime(progress) {
+  const totalMilliseconds = progress.reduce((total, session) => total + session.studyTime, 0);
+  return formatStudyTime(totalMilliseconds);
+}
+
+function getTotalCompletedTopics(progress) {
+  return progress.reduce((total, session) => total + session.completedTopics.length, 0);
+}
+</script>
+
+<%- include('../partials/footer') %> 

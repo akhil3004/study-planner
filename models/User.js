@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  scheme: {
+    type: String,
+    required: true,
+    enum: ['2015', '2019', '2024']
+  },
   createdAt: {
     type: Date,
     default: Date.now

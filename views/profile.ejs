@@ -16,7 +16,7 @@
     <div class="profile-content">
       <div class="profile-section">
         <h2>Personal Information</h2>
-        <form action="/update-profile" method="POST" class="profile-form">
+        <form action="/auth/update-profile" method="POST" class="profile-form">
           <div class="form-group">
             <label for="name">Full Name</label>
             <input type="text" id="name" name="name" value="<%= user.name %>" required>
@@ -54,9 +54,9 @@
             <label for="scheme">Scheme</label>
             <select id="scheme" name="scheme" required>
               <option value="">Select Scheme</option>
-              <option value="2015-2019" <%= user.scheme === '2015-2019' ? 'selected' : '' %>>2015-2019</option>
-              <option value="2020-2024" <%= user.scheme === '2020-2024' ? 'selected' : '' %>>2020-2024</option>
-              <option value="2025-2029" <%= user.scheme === '2025-2029' ? 'selected' : '' %>>2025-2029</option>
+              <option value="2015" <%= user.scheme === '2015' ? 'selected' : '' %>>2015 Scheme</option>
+              <option value="2019" <%= user.scheme === '2019' ? 'selected' : '' %>>2019 Scheme</option>
+              <option value="2024" <%= user.scheme === '2024' ? 'selected' : '' %>>2024 Scheme</option>
             </select>
           </div>
           
@@ -66,7 +66,7 @@
       
       <div class="profile-section">
         <h2>Change Password</h2>
-        <form action="/change-password" method="POST" class="profile-form">
+        <form action="/auth/change-password" method="POST" class="profile-form">
           <div class="form-group">
             <label for="currentPassword">Current Password</label>
             <div class="password-input-wrapper">

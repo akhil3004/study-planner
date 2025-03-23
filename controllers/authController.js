@@ -149,7 +149,7 @@ exports.updateProfile = async (req, res) => {
       return res.redirect('/login');
     }
     
-    const { name, email, branch, currentSemester } = req.body;
+    const { name, email, branch, currentSemester, scheme } = req.body;
     
     // Check if email is already in use by another user
     const existingUser = await User.findOne({ 
@@ -161,7 +161,8 @@ exports.updateProfile = async (req, res) => {
       const user = await User.findById(req.session.user.id);
       return res.render('edit-profile', { 
         user,
-        error: 'Email is already in use by another account' 
+        error: 'Email is already in use by another account',
+        page: 'profile'
       });
     }
     
@@ -172,7 +173,8 @@ exports.updateProfile = async (req, res) => {
         name, 
         email, 
         branch, 
-        currentSemester: parseInt(currentSemester) 
+        currentSemester: parseInt(currentSemester),
+        scheme
       },
       { new: true }
     );
@@ -187,16 +189,18 @@ exports.updateProfile = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       branch: updatedUser.branch,
-      semester: updatedUser.currentSemester
+      semester: updatedUser.currentSemester,
+      scheme: updatedUser.scheme
     };
     
-    res.redirect('/profile?success=true');
+    res.redirect('/auth/profile?success=true');
   } catch (error) {
     console.error('Error updating profile:', error);
     const user = await User.findById(req.session.user.id);
     res.render('edit-profile', { 
       user,
-      error: 'An error occurred while updating your profile' 
+      error: 'An error occurred while updating your profile',
+      page: 'profile'
     });
   }
 };
@@ -221,7 +225,8 @@ exports.changePassword = async (req, res) => {
     if (!isMatch) {
       return res.render('edit-profile', { 
         user,
-        error: 'Current password is incorrect' 
+        error: 'Current password is incorrect',
+        page: 'profile'
       });
     }
     
@@ -229,7 +234,8 @@ exports.changePassword = async (req, res) => {
     if (newPassword !== confirmPassword) {
       return res.render('edit-profile', { 
         user,
-        error: 'New passwords do not match' 
+        error: 'New passwords do not match',
+        page: 'profile'
       });
     }
     
@@ -237,13 +243,14 @@ exports.changePassword = async (req, res) => {
     user.password = newPassword;
     await user.save();
     
-    res.redirect('/profile?passwordChanged=true');
+    res.redirect('/auth/profile?passwordChanged=true');
   } catch (error) {
     console.error('Error changing password:', error);
     const user = await User.findById(req.session.user.id);
-    res.render('edit-profile', { 
+    res.render('profile', { 
       user,
-      error: 'An error occurred while changing your password' 
+      error: 'An error occurred while changing your password',
+      page: 'profile'
     });
   }
 };

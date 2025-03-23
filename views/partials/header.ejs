@@ -31,7 +31,21 @@
       <ul class="nav-links">
         <% if (typeof user !== 'undefined') { %>
           <li><a href="/dashboard">Dashboard</a></li>
-          <li><a href="/courses/semesters">Courses</a></li>
+          <li class="nav-item">
+            <a class="nav-link <%= page === 'courses' ? 'active' : '' %>" href="/courses/semesters">
+              <i class="fas fa-book"></i> Courses
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= page === 'progress' ? 'active' : '' %>" href="/courses/progress">
+              <i class="fas fa-chart-line"></i> My Progress
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= page === 'profile' ? 'active' : '' %>" href="/auth/profile">
+              <i class="fas fa-user"></i> Profile
+            </a>
+          </li>
           <li><a href="/logout">Logout</a></li>
         <% } else { %>
           <li><a href="/login">Login</a></li>

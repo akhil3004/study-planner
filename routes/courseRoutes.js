@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const courseController = require('../controllers/courseController');
 const authController = require('../controllers/authController');
+const StudyProgress = require('../models/StudyProgress');
+const QuizResult = require('../models/QuizResult');
 
 // Apply authentication middleware to all routes
 router.use(authController.isAuthenticated);
@@ -1001,7 +1003,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'CST 202',
         modules: [
           {
-            name: 'Basic Structure of computers, Memory locations and addresses, Instruction cycle, Addressing modes, Basic processing unit',
+            name: 'Module 1',
             topics: [
               'Basic Structure of computers',
               'Memory locations and addresses',
@@ -1011,7 +1013,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Register transfer logic, Processor organization, Arithmetic logic unit design, Status register, Shifter and accumulator design',
+            name: 'Module 2',
             topics: [
               'Register transfer logic',
               'Processor organization',
@@ -1021,7 +1023,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Arithmetic algorithms (Multiplication, Division), Array multiplier, Booth\'s algorithm, Pipelining basics and hazards',
+            name: 'Module 3',
             topics: [
               'Arithmetic algorithms (Multiplication, Division)',
               'Array multiplier',
@@ -1031,7 +1033,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Control Logic Design: Hardwired and Microprogrammed control, Microprogram sequencer',
+            name: 'Module 4',
             topics: [
               'Hardwired control',
               'Microprogrammed control',
@@ -1039,7 +1041,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'I/O Organization, Interrupts, DMA, Memory system: RAMs, ROMs, Cache (Mapping functions), CAM',
+            name: 'Module 5',
             topics: [
               'I/O Organization',
               'Interrupts',
@@ -1056,9 +1058,9 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'CST 204',
         modules: [
           {
-            name: 'DBMS Concepts, Database Users, Data Models, Three-schema architecture, ER model',
+            name: 'Module 1',
             topics: [
-              'DBMS Concepts',
+              'DBMS Concepts',  
               'Database Users',
               'Data Models',
               'Three-schema architecture',
@@ -1066,7 +1068,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Relational Model, Relational Algebra, SQL (DDL Commands)',
+            name: 'Module 2',
             topics: [
               'Relational Model',
               'Relational Algebra',
@@ -1074,7 +1076,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'SQL DML, Nested queries, Aggregation, Views, Indexing (Single, Multi-level), B/B+ Trees, Extendible Hashing',
+            name: 'Module 3',
             topics: [
               'SQL DML',
               'Nested queries',
@@ -1086,7 +1088,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Normalization (1NF, 2NF, 3NF, BCNF), Functional Dependency, Lossless Join and Dependency Preservation',
+            name: 'Module 4',
             topics: [
               'Normalization (1NF, 2NF, 3NF, BCNF)',
               'Functional Dependency',
@@ -1095,7 +1097,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Transactions, Concurrency Control, Locking, Recovery, Introduction to NoSQL (Key-Value DB, Document DB, Column-Family DB, Graph DB)',
+            name: 'Module 5',
             topics: [
               'Transactions',
               'Concurrency Control',
@@ -1115,7 +1117,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'CST 206',
         modules: [
           {
-            name: 'OS Overview, Structure, Services, System Calls, Boot Process',
+            name: 'Module 1',
             topics: [
               'OS Overview',
               'OS Structure',
@@ -1125,7 +1127,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Process concepts, Process scheduling (FCFS, SJF, Priority, RR)',
+            name: 'Module 2',
             topics: [
               'Process concepts',
               'Process scheduling',
@@ -1136,7 +1138,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Process Synchronization (Peterson\'s, Mutex, Semaphore, Monitors), Deadlocks (Prevention, Banker\'s Algorithm, Detection)',
+            name: 'Module 3',
             topics: [
               'Process Synchronization',
               'Peterson\'s Algorithm',
@@ -1150,7 +1152,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Memory Management (Segmentation, Paging, Virtual Memory, Page Replacement Algorithms)',
+            name: 'Module 4',
             topics: [
               'Memory Management',
               'Segmentation',
@@ -1160,7 +1162,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'File Concepts, File Operations, Storage Management (Disk Scheduling, Allocation methods)',
+            name: 'Module 5',
             topics: [
               'File Concepts',
               'File Operations',
@@ -1176,7 +1178,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'MAT 206',
         modules: [
           {
-            name: 'Basic Definitions, Types of Graphs, Walks, Paths, Circuits',
+            name: 'Module 1',
             topics: [
               'Basic Definitions',
               'Types of Graphs',
@@ -1186,16 +1188,15 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Eulerian and Hamiltonian Graphs, Digraphs, Fleury\'s Algorithm',
+            name: 'Module 2',
             topics: [
-              'Eulerian Graphs',
-              'Hamiltonian Graphs',
+              'Eulerian and Hamiltonian Graphs',
               'Digraphs',
               'Fleury\'s Algorithm'
             ]
           },
           {
-            name: 'Trees, Spanning Trees, Prim\'s and Kruskal\'s Algorithms, Dijkstra\'s and Floyd-Warshall\'s algorithms',
+            name: 'Module 3',
             topics: [
               'Trees',
               'Spanning Trees',
@@ -1206,7 +1207,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Connectivity, Cut Sets, Planar Graphs, Kuratowski\'s Theorem',
+            name: 'Module 4',
             topics: [
               'Connectivity',
               'Cut Sets',
@@ -1215,7 +1216,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Graph Representations (Adjacency, Incidence, Path Matrices), Vertex Coloring, Chromatic Polynomial, Greedy Coloring',
+            name: 'Module 5',
             topics: [
               'Graph Representations',
               'Adjacency Matrix',
@@ -1233,7 +1234,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'MCN 202',
         modules: [
           {
-            name: 'Definition of constitution, Historical background, Salient features, Preamble, Union and its territory, Citizenship (types and termination)',
+            name: 'Module 1',
             topics: [
               'Definition of constitution',
               'Historical background',
@@ -1244,7 +1245,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'State definition, Fundamental Rights, Directive Principles, Fundamental Duties, Protection against convictions',
+            name: 'Module 2',
             topics: [
               'State definition',
               'Fundamental Rights',
@@ -1254,7 +1255,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Union Executive (President, VP, PM, AG), Parliament (Rajya Sabha, Lok Sabha, Functions), Union Judiciary (Supreme Court, Jurisdiction)',
+            name: 'Module 3',
             topics: [
               'Union Executive',
               'President',
@@ -1271,7 +1272,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'State Executive (Governor, CM, Advocate General), State Legislature, State Judiciary (High Court)',
+            name: 'Module 4',
             topics: [
               'State Executive',
               'Governor',
@@ -1283,7 +1284,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Union-State Relations (Legislative, Administrative, Financial), Inter-State Council, Finance Commission, Emergency Provisions, Public Services, Official Language, Elections, Constitutional Amendments',
+            name: 'Module 5',
             topics: [
               'Union-State Relations',
               'Legislative Relations',
@@ -1308,7 +1309,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'CST 307',
         modules: [
           {
-            name: 'Evolution of microprocessors, 8085 Architecture, 8086 Architecture, Memory organization, Minimum and maximum modes, Instruction format',
+            name: 'Module 1',
             topics: [
               'Evolution of microprocessors',
               '8085 Architecture',
@@ -1319,7 +1320,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Addressing modes of 8086, Instruction set (data transfer, arithmetic, logical, string manipulation, branch), Assembly language programming, Assembler directives',
+            name: 'Module 2',
             topics: [
               'Addressing modes of 8086',
               'Instruction set',
@@ -1333,7 +1334,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Stack structure in 8086, Interrupts, ISR, Interrupt programming, 8259 Architecture, Memory interfacing',
+            name: 'Module 3',
             topics: [
               'Stack structure in 8086',
               'Interrupts',
@@ -1344,7 +1345,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Interfacing of 8255, 8254, and 8257 with 8086, Modes of operation',
+            name: 'Module 4',
             topics: [
               'Interfacing of 8255',
               'Interfacing of 8254',
@@ -1353,7 +1354,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: '8051 Architecture, Register organization, Memory/I-O addressing, Instruction set, Assembly programming',
+            name: 'Module 5',
             topics: [
               '8051 Architecture',
               'Register organization',
@@ -1369,7 +1370,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'CST 301',
         modules: [
           {
-            name: 'Alphabets, Strings, Languages, DFA, NFA, Equivalence of DFA and NFA, Regular Grammar, Equivalence of RGs and DFA',
+            name: 'Module 1',
             topics: [
               'Alphabets',
               'Strings',
@@ -1382,7 +1383,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Regular Expressions, Homomorphisms, Closure properties, DFA Minimization',
+            name: 'Module 2',
             topics: [
               'Regular Expressions',
               'Homomorphisms',
@@ -1391,7 +1392,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Myhill-Nerode Theorem, CFG, Derivation trees, Ambiguity, Normal forms',
+            name: 'Module 3',
             topics: [
               'Myhill-Nerode Theorem',
               'CFG',
@@ -1401,7 +1402,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'PDA (Deterministic and Non-deterministic), Equivalence of PDA and CFG, Pumping lemma, Closure properties of CFLs',
+            name: 'Module 4',
             topics: [
               'PDA (Deterministic and Non-deterministic)',
               'Equivalence of PDA and CFG',
@@ -1410,7 +1411,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Context Sensitive Grammar, Linear Bounded Automata, Turing Machine, Recursive & Recursively Enumerable Languages, Chomsky Hierarchy',
+            name: 'Module 5',
             topics: [
               'Context Sensitive Grammar',
               'Linear Bounded Automata',
@@ -1427,7 +1428,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'MCN 301',
         modules: [
           {
-            name: 'Lithosphere, Atmosphere, Hydrosphere, Biosphere, Definitions: disaster, hazard, risk, vulnerability, risk assessment, resilience, preparedness, mitigation',
+            name: 'Module 1',
             topics: [
               'Lithosphere',
               'Atmosphere',
@@ -1441,7 +1442,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Hazard types, Hazard mapping, Vulnerability types (physical, social, economic, environmental), Vulnerability assessment',
+            name: 'Module 2',
             topics: [
               'Hazard types',
               'Hazard mapping',
@@ -1454,7 +1455,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Disaster Risk Management, Phases of DRM, Measures for DRR, Disaster response, Relief, International organizations',
+            name: 'Module 3',
             topics: [
               'Disaster Risk Management',
               'Phases of DRM',
@@ -1465,7 +1466,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Stakeholder engagement, Disaster communication, Capacity building (structural & non-structural), Risk reduction strategies',
+            name: 'Module 4',
             topics: [
               'Stakeholder engagement',
               'Disaster communication',
@@ -1476,7 +1477,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Common disasters in India, Indian Disaster Management Policy, Institutional frameworks, Sendai Framework',
+            name: 'Module 5',
             topics: [
               'Common disasters in India',
               'Indian Disaster Management Policy',
@@ -1491,7 +1492,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'CST 309',
         modules: [
           {
-            name: 'Software process models (Waterfall, Incremental, Spiral, Agile), Agile manifesto, Agile project management, Case studies',
+            name: 'Module 1',
             topics: [
               'Software process models',
               'Waterfall model',
@@ -1504,7 +1505,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Requirements engineering, SRS Template, Use cases, User stories, Personas, Scenarios, Design concepts, Architectural styles, Component-level design, IEEE Design Documentation',
+            name: 'Module 2',
             topics: [
               'Requirements engineering',
               'SRS Template',
@@ -1519,7 +1520,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'OOD using UML, Design patterns, Open-source licensing (GPL, LGPL, BSD), Software testing (Unit, Integration, System, Black box, White box), Test automation, DevOps, CI/CD, Software maintenance',
+            name: 'Module 3',
             topics: [
               'OOD using UML',
               'Design patterns',
@@ -1538,7 +1539,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Project Management (risk, people, teamwork), Planning, Estimation (COCOMO), Agile management (SCRUM, Kanban)',
+            name: 'Module 4',
             topics: [
               'Project Management',
               'Risk management',
@@ -1552,7 +1553,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Software Quality Assurance (SQA), SPI (CMMI, ISO 9001), Cloud-based software, Virtualization, Microservices',
+            name: 'Module 5',
             topics: [
               'Software Quality Assurance (SQA)',
               'SPI',
@@ -1570,7 +1571,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'CST 305',
         modules: [
           {
-            name: 'System Software vs Application Software, Types of System Software, SIC & SIC/XE Architecture, Addressing modes, Instruction set, Assembler Directives',
+            name: 'Module 1',
             topics: [
               'System Software vs Application Software',
               'Types of System Software',
@@ -1581,7 +1582,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'SIC/XE Assembly Programming, Two-pass assembler, Assembler data structures, Header/Text/End records',
+            name: 'Module 2',
             topics: [
               'SIC/XE Assembly Programming',
               'Two-pass assembler',
@@ -1590,7 +1591,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Machine dependent & independent assembler features, Program relocation, Literals, Program blocks, Control sections, MASM example',
+            name: 'Module 3',
             topics: [
               'Machine dependent assembler features',
               'Machine independent assembler features',
@@ -1602,7 +1603,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Loader & Linker, Absolute loader, Bootstrap loader, Two-pass linking loader, Automatic library search, Loader options',
+            name: 'Module 4',
             topics: [
               'Loader & Linker',
               'Absolute loader',
@@ -1613,7 +1614,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Macro processor (definition, expansion), One-pass macro processor, Device drivers (character/block), Text editors, Debuggers (induction, deduction, backtracking)',
+            name: 'Module 5',
             topics: [
               'Macro processor',
               'Definition and expansion',
@@ -1635,7 +1636,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
         code: 'CST 303',
         modules: [
           {
-            name: 'Network uses, Hardware, Software, OSI & TCP/IP models, Physical Layer (topologies, encoding, media), Performance indicators (bandwidth, delay)',
+            name: 'Module 1',
             topics: [
               'Network uses',
               'Network Hardware',
@@ -1652,7 +1653,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Data Link Layer (design issues, error control, sliding window), MAC protocols, Ethernet, WLAN (802.11), Bridges & Switches',
+            name: 'Module 2',
             topics: [
               'Data Link Layer',
               'Design issues',
@@ -1665,7 +1666,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Network Layer (routing algorithms, flooding, DVR, LSR, multicast routing), Congestion control, QoS techniques',
+            name: 'Module 3',
             topics: [
               'Network Layer',
               'Routing algorithms',
@@ -1678,7 +1679,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'IP protocol, ICMP, ARP, RARP, BOOTP, DHCP, OSPF, BGP, IPv6, ICMPv6',
+            name: 'Module 4',
             topics: [
               'IP protocol',
               'ICMP',
@@ -1693,7 +1694,7 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
             ]
           },
           {
-            name: 'Transport Layer (UDP, TCP, connection management, congestion control), Application Layer (FTP, DNS, Email, MIME, SNMP, WWW)',
+            name: 'Module 4',
             topics: [
               'Transport Layer',
               'UDP',
@@ -2225,5 +2226,101 @@ router.get('/semester/:semester/branch/:branch', (req, res) => {
 
 router.get('/course/:courseId/modules', courseController.getModules);
 router.get('/module/:moduleId/study', courseController.getStudySession);
+
+// Save study progress
+router.post('/api/study-progress', authController.isAuthenticated, async (req, res) => {
+  try {
+    const { moduleId, completedTopics, studyTime } = req.body;
+    const userId = req.session.user.id; // Changed from req.user._id to req.session.user.id
+
+    // Validate required fields
+    if (!moduleId || !completedTopics || !studyTime) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: moduleId, completedTopics, or studyTime' 
+      });
+    }
+
+    // Create new study progress
+    const studyProgress = new StudyProgress({
+      userId,
+      moduleId: moduleId,
+      completedTopics,
+      studyTime
+    });
+
+    // Save to database
+    await studyProgress.save();
+    
+    res.status(201).json({ 
+      message: 'Study progress saved successfully',
+      progress: studyProgress 
+    });
+  } catch (error) {
+    console.error('Error saving study progress:', error);
+    res.status(500).json({ 
+      error: error.message || 'Failed to save study progress',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// Get study progress
+router.get('/api/study-progress', authController.isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.user.id; // Changed from req.user._id to req.session.user.id
+    const progress = await StudyProgress.find({ userId })
+      .sort({ date: -1 })
+      .populate('moduleId');
+    
+    res.status(200).json(progress);
+  } catch (error) {
+    console.error('Error fetching progress:', error);
+    res.status(500).json({ error: 'Failed to fetch progress' });
+  }
+});
+
+// View study progress page
+router.get('/progress', authController.isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const progress = await StudyProgress.find({ userId })
+      .populate('moduleId')
+      .sort({ date: -1 });
+
+    // Get quiz results
+    const quizResults = await QuizResult.find({ userId })
+      .populate('moduleId')
+      .sort({ date: -1 });
+
+    // Format total study time
+    const formatTotalStudyTime = (progress) => {
+      const totalMilliseconds = progress.reduce((total, session) => total + session.studyTime, 0);
+      const hours = Math.floor(totalMilliseconds / 3600000);
+      const minutes = Math.floor((totalMilliseconds % 3600000) / 60000);
+      const seconds = Math.floor((totalMilliseconds % 60000) / 1000);
+      
+      if (hours > 0) {
+        return `${hours}h ${minutes}m ${seconds}s`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+      } else {
+        return `${seconds}s`;
+      }
+    };
+
+    res.render('dashboard/progress', {
+      progress,
+      quizResults,
+      page: 'progress',
+      formatTotalStudyTime
+    });
+  } catch (error) {
+    console.error('Error fetching progress:', error);
+    res.status(500).render('error', { 
+      message: 'Failed to load progress page',
+      page: 'progress'
+    });
+  }
+});
 
 module.exports = router;

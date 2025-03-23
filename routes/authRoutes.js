@@ -14,8 +14,20 @@ router.get('/logout', authController.logout);
 router.get('/dashboard', authController.isAuthenticated, authController.getDashboard);
 
 // Profile routes
-router.get('/profile', authController.isAuthenticated, authController.getProfile);
-router.get('/edit-profile', authController.isAuthenticated, authController.getEditProfile);
+router.get('/profile', authController.isAuthenticated, (req, res) => {
+  res.render('profile', {
+    user: req.session.user,
+    page: 'profile'
+  });
+});
+
+router.get('/edit-profile', authController.isAuthenticated, (req, res) => {
+  res.render('edit-profile', {
+    user: req.session.user,
+    page: 'profile'
+  });
+});
+
 router.post('/update-profile', authController.isAuthenticated, authController.updateProfile);
 router.post('/change-password', authController.isAuthenticated, authController.changePassword);
 
