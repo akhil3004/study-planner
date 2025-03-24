@@ -1,6 +1,19 @@
+// Script to reset Mongoose models and verify schema
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/mydatabase')
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
+
+// Delete User model if it exists
+if (mongoose.modelNames().includes('User')) {
+  console.log('Deleting existing User model');
+  delete mongoose.models.User;
+}
+
+// Recreate User schema and model
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -65,4 +78,27 @@ const User = mongoose.model('User', userSchema);
 // Verify schema
 console.log('User Schema enum values for scheme:', userSchema.path('scheme').enumValues);
 
-module.exports = User;
+// Test validation
+const testUser = new User({
+  name: 'Test User',
+  email: 'test@example.com',
+  password: 'password123',
+  registerNumber: 'TEST123',
+  branch: 'Computer Science and Engineering',
+  currentSemester: 1,
+  scheme: '2019'
+});
+
+testUser.validate()
+  .then(() => {
+    console.log('Test user validation successful');
+    console.log(testUser);
+  })
+  .catch(err => {
+    console.error('Test user validation failed:', err.message);
+  })
+  .finally(() => {
+    mongoose.disconnect()
+      .then(() => console.log('Mongoose disconnected'))
+      .catch(err => console.error('Error disconnecting Mongoose:', err));
+  }); 

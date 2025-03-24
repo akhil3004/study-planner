@@ -46,12 +46,21 @@ exports.postLogin = async (req, res) => {
 // Register submission
 exports.postRegister = async (req, res) => {
   try {
-    const { name, email, password, registerNumber, branch, currentSemester } = req.body;
+    const { name, email, password, registerNumber, branch, currentSemester, scheme } = req.body;
+    
+    // Debug logging
+    console.log('Received form data:');
+    console.log('scheme:', scheme, typeof scheme);
     
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { registerNumber }] });
     if (existingUser) {
       return res.render('register', { error: 'Email or Register Number already exists' });
+    }
+    
+    // Validate scheme value manually
+    if (!['2015', '2019', '2024'].includes(scheme)) {
+      return res.render('register', { error: `Invalid scheme value: ${scheme}. Must be one of: 2015, 2019, 2024` });
     }
     
     // Create new user
@@ -61,14 +70,15 @@ exports.postRegister = async (req, res) => {
       password,
       registerNumber,
       branch,
-      currentSemester: parseInt(currentSemester)
+      currentSemester: parseInt(currentSemester),
+      scheme: scheme.trim() // Trim any potential whitespace
     });
     
     await user.save();
     res.redirect('/login');
   } catch (error) {
     console.error(error);
-    res.render('register', { error: 'An error occurred during registration' });
+    res.render('register', { error: 'An error occurred during registration: ' + error.message });
   }
 };
 
