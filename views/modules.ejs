@@ -1,38 +1,306 @@
 <%- include('partials/header') %>
 
 <div class="container">
-  <h1><%= course.name %> Modules</h1>
+  <h1><%= course.name %></h1>
   
   <div class="breadcrumb">
-    <span>Dashboard</span> > <span>Courses</span> > <span><%= course.name %></span> > <span>Modules</span>
+    <a href="/dashboard">Dashboard</a> > 
+    <a href="/courses/semesters">Semesters</a> > 
+    <a href="/courses/semester/<%= course.semester %>">Semester <%= course.semester %></a> >
+    <a href="/courses/semester/<%= course.semester %>/branch/<%= encodeURIComponent(course.branch) %>"><%= course.branch %></a> >
+    <span><%= course.name %></span>
   </div>
   
   <div class="course-info">
-    <p><strong>Course Code:</strong> <%= course.code %></p>
-    <p><strong>Credits:</strong> <%= course.credits %></p>
-    <p><strong>Description:</strong> <%= course.description %></p>
+    <div class="course-code"><strong>Code:</strong> <%= course.code || 'N/A' %></div>
+    <% if (course.credits) { %>
+      <div class="course-credits"><strong>Credits:</strong> <%= course.credits %></div>
+    <% } %>
+    <% if (course.description) { %>
+      <div class="course-description"><strong>Description:</strong> <%= course.description %></div>
+    <% } %>
   </div>
   
-  <% if (modules.length === 0) { %>
-    <div class="alert alert-info">
-      No modules found for this course. Please check back later.
+  <% if (!course.modules || course.modules.length === 0) { %>
+    <div class="alert alert-info mt-4">
+      <p>No modules found for this course. Please check back later.</p>
     </div>
   <% } else { %>
-    <div class="card-container">
-      <% modules.forEach(function(module) { %>
-        <div class="card">
-          <div class="card-header">
-            <h2>Module <%= module.number %></h2>
+    <div class="module-list mt-4">
+      <% course.modules.forEach((module, index) => { %>
+        <div class="module-card">
+          <div class="module-header">
+            <h2>
+              <span class="module-number"><%= module.number || (index + 1) %></span>
+              <%= module.name %>
+            </h2>
           </div>
-          <div class="card-body">
-            <h3 class="card-title"><%= module.name %></h3>
-            <p class="card-text"><strong>Topics:</strong> <%= module.topics.length %></p>
-            <a href="/courses/module/<%= module._id %>/study" class="btn">Start Studying</a>
+          
+          <div class="module-content">
+            <% if (module.description) { %>
+              <div class="module-description">
+                <p><%= module.description %></p>
+              </div>
+            <% } %>
+            
+            <div class="topic-section">
+              <h3>Topics</h3>
+              
+              <% if (module.topics && Array.isArray(module.topics) && module.topics.length > 0) { %>
+                <ul class="topic-list">
+                  <% module.topics.forEach((topic, topicIndex) => { %>
+                    <li class="topic-item">
+                      <span class="topic-number"><%= topicIndex + 1 %></span>
+                      <span class="topic-text">
+                        <%= typeof topic === 'string' ? topic : (topic.name || 'Unnamed Topic') %>
+                      </span>
+                    </li>
+                  <% }); %>
+                </ul>
+              <% } else { %>
+                <p class="no-topics">No topics available for this module.</p>
+              <% } %>
+            </div>
+            
+            <div class="module-actions">
+              <a href="/courses/module/<%= module._id %>/study" class="btn btn-primary">
+                <i class="fas fa-book-open"></i> Study This Module
+              </a>
+              <a href="/quiz/module/<%= module._id %>" class="btn btn-secondary">
+                <i class="fas fa-question-circle"></i> Take Quiz
+              </a>
+            </div>
           </div>
         </div>
       <% }); %>
     </div>
   <% } %>
+  
+  <div class="text-center mt-4 mb-5">
+    <a href="/courses/semester/<%= course.semester %>/branch/<%= encodeURIComponent(course.branch) %>" class="btn btn-back">
+      <i class="fas fa-arrow-left"></i> Back to Course List
+    </a>
+  </div>
 </div>
+
+<style>
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.breadcrumb a {
+  color: #0066cc;
+  text-decoration: none;
+  margin-right: 0.5rem;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb span {
+  margin-left: 0.5rem;
+}
+
+.breadcrumb > *:not(:last-child)::after {
+  content: ">";
+  margin-left: 0.5rem;
+}
+
+.course-info {
+  background: #f9f9ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.course-code, .course-credits {
+  margin-bottom: 0.5rem;
+}
+
+.course-description {
+  color: #555;
+  line-height: 1.5;
+}
+
+.module-card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.module-card:hover {
+  transform: translateY(-5px);
+}
+
+.module-header {
+  background: #f1f8ff;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e8f0fe;
+}
+
+.module-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.module-number {
+  background: #0066cc;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  margin-right: 1rem;
+}
+
+.module-content {
+  padding: 1.5rem;
+}
+
+.module-description {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.topic-section h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #444;
+}
+
+.topic-list {
+  list-style: none;
+  padding: 0;
+}
+
+.topic-item {
+  padding: 0.75rem 1rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: start;
+  transition: background-color 0.2s ease;
+}
+
+.topic-item:hover {
+  background: #f1f1f1;
+}
+
+.topic-number {
+  background: #e9ecef;
+  color: #495057;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.topic-text {
+  flex: 1;
+  line-height: 1.5;
+}
+
+.no-topics {
+  color: #666;
+  font-style: italic;
+}
+
+.module-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #0066cc;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #0055bb;
+  color: white;
+}
+
+.btn-secondary {
+  background: #f8f9fa;
+  color: #333;
+  border: 1px solid #dee2e6;
+}
+
+.btn-secondary:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.btn-back {
+  background: #6c757d;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+}
+
+.btn-back:hover {
+  background: #5a6268;
+  color: white;
+}
+
+.alert {
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+}
+
+.alert-info {
+  background: #e3f2fd;
+  color: #0066cc;
+  border: 1px solid #b3e0ff;
+}
+
+.mt-4 {
+  margin-top: 2rem;
+}
+
+.mb-5 {
+  margin-bottom: 3rem;
+}
+</style>
 
 <%- include('partials/footer') %>

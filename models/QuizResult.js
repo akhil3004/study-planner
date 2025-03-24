@@ -13,9 +13,15 @@ const quizResultSchema = new mongoose.Schema({
   },
   score: {
     type: Number,
-    required: true,
-    min: 0,
-    max: 100
+    required: true
+  },
+  totalQuestions: {
+    type: Number,
+    required: true
+  },
+  correctAnswers: {
+    type: Number,
+    required: true
   },
   timeTaken: {
     type: Number, // in milliseconds
@@ -27,4 +33,6 @@ const quizResultSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('QuizResult', quizResultSchema); 
+const QuizResult = mongoose.model('QuizResult', quizResultSchema);
+
+module.exports = QuizResult; 

@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const quizSchema = new mongoose.Schema({
   moduleId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Module',
     required: true
   },
   userId: {
@@ -11,35 +12,18 @@ const quizSchema = new mongoose.Schema({
     required: true
   },
   questions: [{
-    question: {
-      type: String,
-      required: true
-    },
-    options: [{
-      type: String,
-      required: true
-    }],
-    correctAnswer: {
-      type: Number,
-      required: true
-    },
-    topic: {
-      type: String,
-      required: true
-    }
+    question: String,
+    options: [String],
+    correctAnswer: Number,
+    topic: String
   }],
-  answers: [{
-    type: Number,
-    required: true
-  }],
+  answers: [Number],
   score: {
     type: Number,
-    required: true,
-    min: 0,
-    max: 100
+    required: true
   },
   timeTaken: {
-    type: Number,
+    type: Number, // in milliseconds
     required: true
   },
   date: {

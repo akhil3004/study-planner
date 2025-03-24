@@ -38,7 +38,7 @@
               <%= new Date(session.date).toLocaleDateString() %>
             </div>
             <div class="timeline-content">
-              <h6><%= session.moduleId.name %></h6>
+              <h6><%= session.moduleId && session.moduleId.name ? session.moduleId.name : 'Unknown Module' %></h6>
               <p>Study Time: <%= Math.floor(session.studyTime / 60000) %> minutes</p>
               <p>Completed Topics: <%= session.completedTopics.length %></p>
               <ul class="list-unstyled">
@@ -97,7 +97,7 @@
                 <%= new Date(quiz.date).toLocaleDateString() %>
               </div>
               <div class="timeline-content">
-                <h6><%= quiz.moduleId.name %></h6>
+                <h6><%= quiz.moduleId && quiz.moduleId.name ? quiz.moduleId.name : 'Unknown Module' %></h6>
                 <p>Score: <%= quiz.score %>%</p>
                 <p>Time Taken: <%= Math.floor(quiz.timeTaken / 60) %> minutes</p>
               </div>

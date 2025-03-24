@@ -7,16 +7,17 @@ const studyProgressSchema = new mongoose.Schema({
     required: true
   },
   moduleId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Module',
     required: true
   },
   completedTopics: [{
-    type: String,
-    required: true
+    type: String
   }],
   studyTime: {
-    type: Number, // in milliseconds
-    required: true
+    type: Number, // time in milliseconds
+    required: true,
+    default: 0
   },
   date: {
     type: Date,
@@ -24,4 +25,6 @@ const studyProgressSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('StudyProgress', studyProgressSchema); 
+const StudyProgress = mongoose.model('StudyProgress', studyProgressSchema);
+
+module.exports = StudyProgress; 

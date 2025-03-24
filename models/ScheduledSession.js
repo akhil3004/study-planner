@@ -7,7 +7,8 @@ const scheduledSessionSchema = new mongoose.Schema({
     required: true
   },
   moduleId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Module',
     required: true
   },
   moduleName: {
@@ -22,10 +23,9 @@ const scheduledSessionSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
-  status: {
-    type: String,
-    enum: ['pending', 'completed', 'cancelled'],
-    default: 'pending'
+  completed: {
+    type: Boolean,
+    default: false
   },
   createdAt: {
     type: Date,
@@ -33,4 +33,6 @@ const scheduledSessionSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('ScheduledSession', scheduledSessionSchema); 
+const ScheduledSession = mongoose.model('ScheduledSession', scheduledSessionSchema);
+
+module.exports = ScheduledSession; 

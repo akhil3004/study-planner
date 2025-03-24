@@ -4,50 +4,776 @@
   <h1><%= module.name %> - Study Session</h1>
   
   <div class="breadcrumb">
-    <span>Dashboard</span> > <span>Courses</span> > <span><%= module.courseId.name %></span> > <span>Modules</span> > <span>Study Session</span>
+    <a href="/dashboard">Dashboard</a> > 
+    <a href="/courses/semesters">Courses</a> > 
+    <% if (module.courseId) { %>
+      <a href="/courses/course/<%= module.courseId._id %>/modules"><%= module.courseId.name %></a>
+    <% } else { %>
+      <span>Course</span>
+    <% } %> > 
+    <span>Study Session</span>
   </div>
   
-  <div class="timer-container">
-    <h2>Study Timer</h2>
-    <div id="timer" class="timer" data-time="45">45:00</div>
-    <div class="timer-controls">
-      <button id="start-timer" class="btn">Start</button>
-      <button id="pause-timer" class="btn">Pause</button>
-      <button id="reset-timer" class="btn">Reset</button>
-    </div>
+  <% if (module.courseId) { %>
+  <div class="course-info">
+    <h5>Course Information</h5>
+    <div><strong>Code:</strong> <%= module.courseId.code || 'N/A' %></div>
+    <div><strong>Semester:</strong> <%= module.courseId.semester || 'N/A' %></div>
+    <div><strong>Branch:</strong> <%= module.courseId.branch || 'N/A' %></div>
   </div>
+  <% } %>
   
-  <div class="module-content">
-    <h2>Module Topics</h2>
-    
-    <% module.topics.forEach(function(topic, index) { %>
-      <div class="topic-card">
-        <h3><%= index + 1 %>. <%= topic.name %></h3>
-        <p><strong>Recommended Study Time:</strong> <%= topic.recommendedStudyTime %> minutes</p>
-        
-        <% if (topic.resources && topic.resources.length > 0) { %>
-          <div class="resources">
-            <h4>Resources</h4>
-            <ul>
-              <% topic.resources.forEach(function(resource) { %>
-                <li>
-                  <a href="<%= resource.url %>" target="_blank">
-                    <%= resource.title %> (<%= resource.type %>)
-                  </a>
-                </li>
-              <% }); %>
-            </ul>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card timer-card">
+        <div class="card-header">
+          <h2>Study Timer</h2>
+        </div>
+        <div class="card-body">
+          <div id="timer" class="timer">00:00:00</div>
+          <div class="timer-controls">
+            <button id="start-timer" class="btn btn-primary">Start</button>
+            <button id="pause-timer" class="btn btn-warning">Pause</button>
+            <button id="reset-timer" class="btn btn-danger">Reset</button>
           </div>
-        <% } %>
+        </div>
       </div>
-    <% }); %>
-  </div>
-  
-  <div class="action-buttons">
-    <a href="/quiz/module/<%= module._id %>" id="start-quiz" class="btn btn-primary btn-disabled">Take Quiz</a>
+      
+      <div class="card action-card mt-4">
+        <div class="card-header">
+          <h2>Actions</h2>
+        </div>
+        <div class="card-body">
+          <div class="topic-progress-bar mb-4">
+            <div class="progress">
+              <div id="progress-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <button id="reschedule-btn" class="btn btn-info btn-block mb-3" data-module-id="<%= module._id %>" data-module-name="<%= module.name %>" data-course-name="<%= module.courseId ? module.courseId.name : 'Unknown Course' %>">
+              <i class="fas fa-calendar-alt"></i> Reschedule
+            </button>
+            <button id="finish-study" class="btn btn-success btn-block mb-3">
+              <i class="fas fa-check-circle"></i> Finish Study Session
+            </button>
+            <a href="/quiz/module/<%= module._id %>" id="start-quiz" class="btn btn-primary btn-block">
+              <i class="fas fa-question-circle"></i> Take Quiz
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-8">
+      <div class="card module-content-card">
+        <div class="card-header">
+          <h2>Module Topics</h2>
+        </div>
+        <div class="card-body">
+          <% if (module.topics && module.topics.length > 0) { %>
+            <div class="topic-list">
+              <% module.topics.forEach(function(topic, index) { %>
+                <div class="topic-card" id="topic-card-<%= index %>">
+                  <div class="topic-header">
+                    <h3><%= index + 1 %>. <%= typeof topic === 'string' ? topic : (topic.name || 'Unnamed Topic') %></h3>
+                  </div>
+                  
+                  <div class="topic-body">
+                    <% if (typeof topic === 'object' && topic.description) { %>
+                      <div class="topic-description">
+                        <p><%= topic.description %></p>
+                      </div>
+                    <% } %>
+                    
+                    <% if (typeof topic === 'object' && topic.recommendedStudyTime) { %>
+                      <div class="study-time">
+                        <p><strong>Recommended Study Time:</strong> <%= topic.recommendedStudyTime %> minutes</p>
+                      </div>
+                    <% } %>
+                    
+                    <% if (typeof topic === 'object' && topic.resources && topic.resources.length > 0) { %>
+                      <div class="resources">
+                        <h4>Resources</h4>
+                        <ul class="resource-list">
+                          <% topic.resources.forEach(function(resource) { %>
+                            <li class="resource-item">
+                              <% if (resource.url) { %>
+                                <a href="<%= resource.url %>" target="_blank" class="resource-link">
+                                  <%= resource.title || 'Resource' %> 
+                                  <% if (resource.type) { %>
+                                    <span class="resource-type">(<%= resource.type %>)</span>
+                                  <% } %>
+                                </a>
+                              <% } else { %>
+                                <span><%= resource.title || 'Resource' %></span>
+                              <% } %>
+                            </li>
+                          <% }); %>
+                        </ul>
+                      </div>
+                    <% } %>
+                    
+                    <div class="topic-progress mt-3">
+                      <div class="form-check">
+                        <input class="form-check-input topic-checkbox" type="checkbox" id="topic-<%= index %>" value="<%= typeof topic === 'string' ? topic : (topic.name || 'Topic ' + (index + 1)) %>">
+                        <label class="form-check-label" for="topic-<%= index %>">
+                          Mark as completed
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          <% } else { %>
+            <div class="alert alert-warning">
+              <p>No topics available for this module.</p>
+              <p>Please contact your instructor or check back later when content is added.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<script src="/js/timer.js"></script>
+<!-- Reschedule Modal -->
+<div id="rescheduleModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Schedule Study Session</h3>
+      <span class="close-modal">&times;</span>
+    </div>
+    <div class="modal-body">
+      <form id="rescheduleForm">
+        <div class="form-group">
+          <label for="sessionDateTime">Select Date and Time</label>
+          <input type="datetime-local" id="sessionDateTime" class="form-control" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary cancel-reschedule">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Global Styles */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -10px;
+}
+
+.col-md-4, .col-md-8 {
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.col-md-4 {
+  width: 33.333%;
+}
+
+.col-md-8 {
+  width: 66.667%;
+}
+
+@media (max-width: 768px) {
+  .col-md-4, .col-md-8 {
+    width: 100%;
+  }
+}
+
+/* Card Styles */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: #f8f9fa;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* Course Info Styles */
+.course-info {
+  background: #f0f8ff;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.course-info h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #0066cc;
+}
+
+.course-info div {
+  margin-bottom: 5px;
+}
+
+/* Timer Styles */
+.timer-card {
+  text-align: center;
+}
+
+.timer {
+  font-size: 3rem;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  margin: 20px 0;
+  color: #333;
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Action Card Styles */
+.action-card .action-buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn {
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  display: inline-block;
+  text-decoration: none;
+  border: none;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-primary {
+  background: #0066cc;
+  color: white;
+}
+
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.progress {
+  height: 15px;
+  background-color: #e9ecef;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: white;
+  background-color: #28a745;
+  transition: width 0.3s;
+}
+
+/* Topic Card Styles */
+.topic-card {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s;
+}
+
+.topic-card.completed {
+  background-color: #e8f5e9;
+  border-left: 4px solid #28a745;
+}
+
+.topic-header h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.topic-description {
+  margin-bottom: 10px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.study-time {
+  background: #e9f7fe;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.resources {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 15px;
+}
+
+.resources h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.resource-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.resource-item {
+  margin-bottom: 8px;
+}
+
+.resource-link {
+  color: #0066cc;
+  text-decoration: none;
+  display: block;
+  padding: 5px 10px;
+  background: #fff;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.resource-link:hover {
+  background-color: #f0f8ff;
+  text-decoration: underline;
+}
+
+.resource-type {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+}
+
+.form-check-input {
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+}
+
+.form-check-label {
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.close-modal {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #aaa;
+}
+
+.close-modal:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Breadcrumb Styles */
+.breadcrumb {
+  display: flex;
+  margin-bottom: 20px;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+.breadcrumb a {
+  color: #0066cc;
+  text-decoration: none;
+  margin-right: 5px;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb span {
+  color: #666;
+}
+
+.breadcrumb > *:not(:last-child)::after {
+  content: ">";
+  margin: 0 5px;
+  color: #aaa;
+}
+
+/* Alert Styles */
+.alert {
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.mb-3 {
+  margin-bottom: 15px !important;
+}
+
+.mt-3 {
+  margin-top: 15px !important;
+}
+
+.mt-4 {
+  margin-top: 20px !important;
+}
+
+.mb-4 {
+  margin-bottom: 20px !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Timer elements
+  const timerDisplay = document.getElementById('timer');
+  const startButton = document.getElementById('start-timer');
+  const pauseButton = document.getElementById('pause-timer');
+  const resetButton = document.getElementById('reset-timer');
+  const finishButton = document.getElementById('finish-study');
+  const progressBar = document.getElementById('progress-bar');
+  const topicCheckboxes = document.querySelectorAll('.topic-checkbox');
+  const rescheduleButton = document.getElementById('reschedule-btn');
+  
+  // Modal elements
+  const modal = document.getElementById('rescheduleModal');
+  const closeModal = document.querySelector('.close-modal');
+  const cancelReschedule = document.querySelector('.cancel-reschedule');
+  const rescheduleForm = document.getElementById('rescheduleForm');
+  const sessionDateTime = document.getElementById('sessionDateTime');
+  
+  // Timer variables
+  let seconds = 0;
+  let minutes = 0;
+  let hours = 0;
+  let timerInterval = null;
+  let isRunning = false;
+  
+  // Update timer display
+  function updateTimerDisplay() {
+    timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+  
+  // Start timer
+  startButton.addEventListener('click', function() {
+    if (!isRunning) {
+      isRunning = true;
+      timerInterval = setInterval(function() {
+        seconds++;
+        if (seconds === 60) {
+          seconds = 0;
+          minutes++;
+          if (minutes === 60) {
+            minutes = 0;
+            hours++;
+          }
+        }
+        updateTimerDisplay();
+      }, 1000);
+    }
+  });
+  
+  // Pause timer
+  pauseButton.addEventListener('click', function() {
+    if (isRunning) {
+      isRunning = false;
+      clearInterval(timerInterval);
+    }
+  });
+  
+  // Reset timer
+  resetButton.addEventListener('click', function() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    seconds = 0;
+    minutes = 0;
+    hours = 0;
+    updateTimerDisplay();
+  });
+  
+  // Progress tracking
+  function updateProgressBar() {
+    const totalTopics = topicCheckboxes.length;
+    const completedTopics = document.querySelectorAll('.topic-checkbox:checked').length;
+    const percentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+    
+    progressBar.style.width = `${percentage}%`;
+    progressBar.textContent = `${percentage}%`;
+    progressBar.setAttribute('aria-valuenow', percentage);
+  }
+  
+  // Initialize progress bar
+  updateProgressBar();
+  
+  // Add event listeners to checkboxes
+  topicCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      const topicCard = document.getElementById(`topic-card-${this.id.split('-')[1]}`);
+      if (this.checked) {
+        topicCard.classList.add('completed');
+      } else {
+        topicCard.classList.remove('completed');
+      }
+      updateProgressBar();
+    });
+  });
+  
+  // Reschedule button - open modal
+  rescheduleButton.addEventListener('click', function() {
+    // Set minimum date to current date and time
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 30); // Minimum 30 minutes from now
+    const minDateTime = now.toISOString().slice(0, 16);
+    sessionDateTime.min = minDateTime;
+    
+    // Show modal
+    modal.style.display = 'flex';
+  });
+  
+  // Close modal events
+  closeModal.addEventListener('click', function() {
+    modal.style.display = 'none';
+  });
+  
+  cancelReschedule.addEventListener('click', function() {
+    modal.style.display = 'none';
+  });
+  
+  // Close modal when clicking outside
+  window.addEventListener('click', function(event) {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+  
+  // Reschedule form submission
+  rescheduleForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const moduleId = rescheduleButton.getAttribute('data-module-id');
+    const moduleName = rescheduleButton.getAttribute('data-module-name');
+    const courseName = rescheduleButton.getAttribute('data-course-name');
+    const scheduledDate = sessionDateTime.value;
+    
+    try {
+      const response = await fetch('/courses/api/study-sessions/schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          moduleId: moduleId,
+          moduleName: moduleName,
+          courseName: courseName,
+          scheduledDate: new Date(scheduledDate)
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to schedule session');
+      }
+      
+      const data = await response.json();
+      
+      // Show success message
+      alert('Study session scheduled successfully!');
+      
+      // Close modal
+      modal.style.display = 'none';
+      
+    } catch (error) {
+      console.error('Error scheduling study session:', error);
+      alert('Error scheduling study session: ' + error.message);
+    }
+  });
+  
+  // Finish study session
+  finishButton.addEventListener('click', function() {
+    // Calculate total study time in milliseconds
+    const totalStudyTime = (hours * 3600 + minutes * 60 + seconds) * 1000;
+    
+    // Get completed topics
+    const completedTopics = Array.from(document.querySelectorAll('.topic-checkbox:checked'))
+      .map(checkbox => checkbox.value);
+    
+    if (completedTopics.length === 0) {
+      if (!confirm('You haven\'t marked any topics as completed. Do you still want to finish the session?')) {
+        return;
+      }
+    }
+    
+    // Save progress
+    saveStudyProgress('<%= module._id %>', completedTopics, totalStudyTime);
+  });
+  
+  // Save study progress
+  async function saveStudyProgress(moduleId, completedTopics, studyTime) {
+    try {
+      const response = await fetch('/courses/api/study-progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          moduleId,
+          completedTopics,
+          studyTime
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save progress');
+      }
+      
+      // Show success message
+      alert('Progress saved successfully!');
+      
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
+      
+    } catch (error) {
+      console.error('Error saving progress:', error);
+      alert('Error saving progress: ' + error.message);
+    }
+  }
+});
+</script>
 
 <%- include('partials/footer') %>

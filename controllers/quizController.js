@@ -1,5 +1,6 @@
 const Quiz = require('../models/Quiz');
 const Module = require('../models/Module');
+const Course = require('../models/Course');
 
 exports.getQuiz = async (req, res) => {
   try {
@@ -29,38 +30,26 @@ exports.getQuiz = async (req, res) => {
 // Generate quiz questions based on module topics
 exports.generateQuiz = async (req, res) => {
   try {
-    const { moduleId, topics } = req.body;
+    const { moduleId } = req.body;
     
-    // Extract the actual module index from the moduleId (e.g., "module-0" -> 0)
-    const moduleIndex = parseInt(moduleId.split('-')[1]);
-    
-    // Get the module from the course data
-    const semester = req.session.selectedSemester || '3';
-    const branch = req.session.selectedBranch || 'CSE';
-    
-    // Get the course data from the route
-    const courses = getCoursesForSemesterAndBranch(semester, branch);
-    
-    // Find the module in the courses
-    let selectedModule = null;
-    for (const course of courses) {
-      if (course.modules[moduleIndex]) {
-        selectedModule = course.modules[moduleIndex];
-        break;
-      }
-    }
-    
-    if (!selectedModule) {
+    // Get the module from MongoDB
+    const module = await Module.findById(moduleId);
+    if (!module) {
       return res.status(404).json({ error: 'Module not found' });
     }
 
     // Generate 5 questions based on topics
     const questions = [];
-    const availableTopics = topics || selectedModule.topics;
+    const availableTopics = module.topics || [];
+
+    // Make sure we have topics to create questions
+    if (availableTopics.length === 0) {
+      return res.status(400).json({ error: 'No topics available for this module' });
+    }
 
     // Shuffle topics to get random selection
     const shuffledTopics = [...availableTopics].sort(() => Math.random() - 0.5);
-    const selectedTopics = shuffledTopics.slice(0, 5);
+    const selectedTopics = shuffledTopics.slice(0, Math.min(5, shuffledTopics.length));
 
     for (const topic of selectedTopics) {
       // Generate different types of questions based on topic
@@ -123,26 +112,9 @@ exports.submitQuiz = async (req, res) => {
     const { moduleId, answers, timeTaken, questions } = req.body;
     const userId = req.session.user.id;
 
-    // Extract the actual module index from the moduleId (e.g., "module-0" -> 0)
-    const moduleIndex = parseInt(moduleId.split('-')[1]);
-    
-    // Get the module from the course data
-    const semester = req.session.selectedSemester || '3';
-    const branch = req.session.selectedBranch || 'CSE';
-    
-    // Get the course data from the route
-    const courses = getCoursesForSemesterAndBranch(semester, branch);
-    
-    // Find the module in the courses
-    let selectedModule = null;
-    for (const course of courses) {
-      if (course.modules[moduleIndex]) {
-        selectedModule = course.modules[moduleIndex];
-        break;
-      }
-    }
-    
-    if (!selectedModule) {
+    // Get the module
+    const module = await Module.findById(moduleId);
+    if (!module) {
       return res.status(404).json({ error: 'Module not found' });
     }
 
@@ -159,7 +131,7 @@ exports.submitQuiz = async (req, res) => {
 
     // Save quiz result
     const quizResult = new Quiz({
-      moduleId: selectedModule.name, // Store the module name instead of ID
+      moduleId,
       userId,
       questions,
       answers,
